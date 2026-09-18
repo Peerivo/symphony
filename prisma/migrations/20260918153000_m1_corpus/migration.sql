@@ -272,3 +272,12 @@ CREATE TABLE "IngestionRun" (
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX "IngestionRun_stage_status_idx" ON "IngestionRun"("stage","status");
+
+CREATE TABLE "PassagePopularitySignal" (
+  "id" TEXT PRIMARY KEY,
+  "passageId" TEXT NOT NULL REFERENCES "Passage"("id") ON DELETE CASCADE,
+  "bucket" TIMESTAMP(3) NOT NULL,
+  "count" INTEGER NOT NULL DEFAULT 1
+);
+CREATE UNIQUE INDEX "PassagePopularitySignal_passageId_bucket_key" ON "PassagePopularitySignal"("passageId","bucket");
+CREATE INDEX "PassagePopularitySignal_bucket_idx" ON "PassagePopularitySignal"("bucket");
