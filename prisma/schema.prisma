@@ -1,7 +1,7 @@
-// M1 conceptual Prisma schema. Extend via migrations; production deploys migrations through GitHub Actions.
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -16,6 +16,7 @@ enum RightsStatus {
   LINK_ONLY
   RESTRICTED
 }
+
 enum SourceKind {
   SCRIPTURE
   PATRISTIC
@@ -28,145 +29,466 @@ enum SourceKind {
   HADITH
   ARTICLE
   BOOK
+  MEDIA
   USER_QUESTION
   OTHER
 }
+
+enum CorpusKind {
+  SCRIPTURE
+  PATRISTIC
+  COUNCIL
+  LITURGICAL
+  CONFESSIONAL
+  COMMENTARY
+  APOLOGETIC
+  INTERRELIGIOUS
+  MEDIA
+  OTHER
+}
+
+enum PassageKind {
+  BOOK
+  CHAPTER
+  VERSE
+  SECTION
+  PARAGRAPH
+  QUOTE
+  MEDIA_SEGMENT
+  OTHER
+}
+
 enum LinkKind {
   INTERPRETS
   SUPPORTS
   OPPOSES
   PARALLEL_TO
   REFERENCES
+  CITES
+  DEFINES
   ABOUT
   ANSWERS
+  RESPONDS_TO
   RELATED_TO
 }
 
+enum ClaimStatus {
+  ASSERTED
+  AGREED
+  DISPUTED
+  PARTIAL
+  DIVERGENT_DEFINITION
+  DIVERGENT_TEXT
+  UNRESOLVED
+  SUPERSEDED
+}
+
+enum EditorialRole {
+  CONTRIBUTOR
+  INTAKE_EDITOR
+  CORPUS_EDITOR
+  SOURCE_REVIEWER
+  THEOLOGICAL_REVIEWER
+  PUBLISHER
+  ADMIN
+}
+
+enum ReviewStatus {
+  DRAFT
+  IN_REVIEW
+  THEOLOGICAL_REVIEW
+  APPROVED
+  REJECTED
+  PUBLISHED
+  SUPERSEDED
+}
+
+enum IngestionStage {
+  INTAKE
+  CLASSIFICATION
+  EXTRACTION
+  FRAGMENTATION
+  LINKING
+  REVIEW
+  THEOLOGICAL_REVIEW
+  PUBLICATION
+  CORRECTION
+}
+
+enum IngestionRunStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
 model Tradition {
-  id String @id @default(cuid())
-  name String @unique
-  schools School[]
-  authors Author[]
+  id              String           @id @default(cuid())
+  slug            String           @unique
+  name            String
+  schools         School[]
+  people          Person[]
+  corpora         Corpus[]
   interpretations Interpretation[]
-  claims Claim[]
+  claims          Claim[]
 }
+
 model School {
-  id String @id @default(cuid())
-  name String
+  id          String    @id @default(cuid())
+  name        String
   traditionId String
-  tradition Tradition @relation(fields:[traditionId], references:[id])
-  @@unique([traditionId,name])
+  tradition   Tradition @relation(fields: [traditionId], references: [id])
+
+  @@unique([traditionId, name])
 }
-model Author {
-  id String @id @default(cuid())
-  name String
-  traditionId String?
-  tradition Tradition? @relation(fields:[traditionId], references:[id])
-  works Work[]
-  verses Verse[]
+
+model Person {
+  id                 String               @id @default(cuid())
+  slug               String?              @unique
+  name               String
+  traditionId        String?
+  tradition          Tradition?           @relation(fields: [traditionId], references: [id])
+  authoredWorks      Work[]               @relation("WorkAuthor")
+  interpretations    Interpretation[]
+  claims             Claim[]
+  arguments          Argument[]
+  objections         Objection[]
+  responses          Response[]
+  sourceFragments    SourceFragment[]      @relation("FragmentSpeaker")
+  submissions        Submission[]          @relation("SubmissionSubmitter")
+  editorialDecisions EditorialDecision[]   @relation("EditorialReviewer")
+  editorialRoles     PersonEditorialRole[]
 }
+
 model Source {
-  id String @id @default(cuid())
-  name String
-  kind SourceKind
-  canonicalUrl String?
-  rightsStatus RightsStatus @default(UNKNOWN)
-  rightsEvidence String?
-  license String?
-  fetchedAt DateTime?
-  checksum String?
-  parserVersion String?
-  works Work[]
+  id             String           @id @default(cuid())
+  name           String
+  kind           SourceKind
+  canonicalUrl   String?
+  rightsStatus   RightsStatus     @default(UNKNOWN)
+  rightsEvidence String?          @db.Text
+  license        String?
+  fetchedAt      DateTime?
+  checksum       String?
+  parserVersion  String?
+  corpora        Corpus[]
+  works          Work[]
+  passages       Passage[]
+  fragments      SourceFragment[]
+  submissions    Submission[]
+  ingestionRuns  IngestionRun[]
 }
+
+model Corpus {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  name        String
+  kind        CorpusKind
+  language    String?
+  traditionId String?
+  sourceId    String?
+  tradition   Tradition?   @relation(fields: [traditionId], references: [id])
+  source      Source?      @relation(fields: [sourceId], references: [id])
+  works       Work[]
+  editorRoles PersonEditorialRole[]
+}
+
 model Work {
-  id String @id @default(cuid())
-  title String
-  authorId String?
-  sourceId String
-  language String?
-  author Author? @relation(fields:[authorId], references:[id])
-  source Source @relation(fields:[sourceId], references:[id])
-  sections WorkSection[]
+  id            String    @id @default(cuid())
+  corpusId      String
+  title         String
+  authorId      String?
+  sourceId      String?
+  language      String?
+  edition       String?
+  publishedYear Int?
+  corpus        Corpus    @relation(fields: [corpusId], references: [id], onDelete: Cascade)
+  author        Person?   @relation("WorkAuthor", fields: [authorId], references: [id])
+  source        Source?   @relation(fields: [sourceId], references: [id])
+  passages      Passage[]
+
+  @@index([corpusId, title])
 }
-model WorkSection {
-  id String @id @default(cuid())
-  workId String
-  parentId String?
-  ordinal Int
-  heading String?
-  text String @db.Text
-  locator String?
-  work Work @relation(fields:[workId], references:[id], onDelete:Cascade)
-  parent WorkSection? @relation("SectionTree", fields:[parentId], references:[id])
-  children WorkSection[] @relation("SectionTree")
+
+model Passage {
+  id              String           @id @default(cuid())
+  workId          String
+  parentId        String?
+  sourceId        String?
+  ordinal         Int
+  kind            PassageKind      @default(PARAGRAPH)
+  heading         String?
+  text            String           @db.Text
+  locator         String?
+  language        String?
+  work            Work             @relation(fields: [workId], references: [id], onDelete: Cascade)
+  parent          Passage?         @relation("PassageTree", fields: [parentId], references: [id])
+  children        Passage[]        @relation("PassageTree")
+  source          Source?          @relation(fields: [sourceId], references: [id])
+  verse           Verse?
   interpretations Interpretation[]
-  @@index([workId,ordinal])
+  fragments       SourceFragment[]
+  questionLinks   QuestionPassage[]
+  claimLinks      ClaimPassage[]
+
+  @@index([workId, ordinal])
+  @@index([kind])
 }
+
 model Verse {
-  id String @id @default(cuid())
-  osis String @unique
-  book String
-  chapter Int
-  verse Int
-  text String @db.Text
-  edition String?
-  sourceId String?
-  source Source? @relation(fields:[sourceId], references:[id])
-  interpretations Interpretation[]
-  questionLinks QuestionVerse[]
-  @@index([book,chapter,verse])
+  id        String  @id @default(cuid())
+  passageId String  @unique
+  osis      String  @unique
+  book      String
+  chapter   Int
+  verse     Int
+  passage   Passage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@index([book, chapter, verse])
 }
+
 model Interpretation {
-  id String @id @default(cuid())
-  verseId String?
-  sectionId String
-  traditionId String?
-  summary String? @db.Text
-  verse Verse? @relation(fields:[verseId], references:[id])
-  section WorkSection @relation(fields:[sectionId], references:[id])
-  tradition Tradition? @relation(fields:[traditionId], references:[id])
-  @@index([verseId])
+  id               String          @id @default(cuid())
+  passageId        String
+  traditionId      String?
+  personId         String?
+  sourceFragmentId String?
+  summary          String?         @db.Text
+  passage          Passage         @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  tradition        Tradition?      @relation(fields: [traditionId], references: [id])
+  person           Person?         @relation(fields: [personId], references: [id])
+  sourceFragment   SourceFragment? @relation(fields: [sourceFragmentId], references: [id])
+
+  @@index([passageId])
+  @@index([traditionId])
 }
+
+model Topic {
+  id            String          @id @default(cuid())
+  slug          String          @unique
+  title         String
+  description   String?         @db.Text
+  questionLinks QuestionTopic[]
+  claimLinks    ClaimTopic[]
+}
+
 model Question {
-  id String @id @default(cuid())
-  canonicalText String @db.Text
-  normalizedKey String @unique
-  createdAt DateTime @default(now())
-  verses QuestionVerse[]
-  signals PopularitySignal[]
+  id            String            @id @default(cuid())
+  canonicalText String            @db.Text
+  normalizedKey String            @unique
+  createdAt     DateTime          @default(now())
+  passages      QuestionPassage[]
+  topics        QuestionTopic[]
+  signals       PopularitySignal[]
 }
-model QuestionVerse {
+
+model QuestionPassage {
   questionId String
-  verseId String
-  relevance Float @default(1)
-  question Question @relation(fields:[questionId], references:[id], onDelete:Cascade)
-  verse Verse @relation(fields:[verseId], references:[id], onDelete:Cascade)
-  @@id([questionId,verseId])
+  passageId  String
+  relevance  Float    @default(1)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  passage    Passage  @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@id([questionId, passageId])
 }
+
+model QuestionTopic {
+  questionId String
+  topicId    String
+  relevance  Float    @default(1)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  topic      Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([questionId, topicId])
+}
+
 model Claim {
-  id String @id @default(cuid())
-  text String @db.Text
-  traditionId String?
-  sourceSectionId String?
-  tradition Tradition? @relation(fields:[traditionId], references:[id])
+  id               String          @id @default(cuid())
+  text             String          @db.Text
+  status           ClaimStatus     @default(ASSERTED)
+  traditionId      String?
+  personId         String?
+  sourceFragmentId String?
+  createdAt        DateTime        @default(now())
+  tradition        Tradition?      @relation(fields: [traditionId], references: [id])
+  person           Person?         @relation(fields: [personId], references: [id])
+  sourceFragment   SourceFragment? @relation(fields: [sourceFragmentId], references: [id])
+  passages         ClaimPassage[]
+  topics           ClaimTopic[]
+  arguments        Argument[]
+  objections       Objection[]
+
+  @@index([status])
 }
+
+model ClaimPassage {
+  claimId   String
+  passageId String
+  relevance Float   @default(1)
+  claim     Claim   @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  passage   Passage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@id([claimId, passageId])
+}
+
+model ClaimTopic {
+  claimId   String
+  topicId   String
+  relevance Float @default(1)
+  claim     Claim  @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  topic     Topic  @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([claimId, topicId])
+}
+
+model Argument {
+  id               String          @id @default(cuid())
+  claimId          String
+  text             String          @db.Text
+  personId         String?
+  sourceFragmentId String?
+  claim            Claim           @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  person           Person?         @relation(fields: [personId], references: [id])
+  sourceFragment   SourceFragment? @relation(fields: [sourceFragmentId], references: [id])
+
+  @@index([claimId])
+}
+
+model Objection {
+  id               String          @id @default(cuid())
+  claimId          String
+  text             String          @db.Text
+  personId         String?
+  sourceFragmentId String?
+  unresolved       Boolean         @default(true)
+  claim            Claim           @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  person           Person?         @relation(fields: [personId], references: [id])
+  sourceFragment   SourceFragment? @relation(fields: [sourceFragmentId], references: [id])
+  responses        Response[]
+
+  @@index([claimId])
+}
+
+model Response {
+  id               String          @id @default(cuid())
+  objectionId      String
+  text             String          @db.Text
+  personId         String?
+  sourceFragmentId String?
+  objection        Objection       @relation(fields: [objectionId], references: [id], onDelete: Cascade)
+  person           Person?         @relation(fields: [personId], references: [id])
+  sourceFragment   SourceFragment? @relation(fields: [sourceFragmentId], references: [id])
+
+  @@index([objectionId])
+}
+
+model SourceFragment {
+  id              String           @id @default(cuid())
+  passageId       String?
+  sourceId        String?
+  speakerId       String?
+  quotedText      String?          @db.Text
+  locator         String?
+  startChar       Int?
+  endChar         Int?
+  startSeconds    Int?
+  endSeconds      Int?
+  pageFrom        Int?
+  pageTo          Int?
+  checksum        String?
+  passage         Passage?         @relation(fields: [passageId], references: [id])
+  source          Source?          @relation(fields: [sourceId], references: [id])
+  speaker         Person?          @relation("FragmentSpeaker", fields: [speakerId], references: [id])
+  interpretations Interpretation[]
+  claims          Claim[]
+  arguments       Argument[]
+  objections      Objection[]
+  responses       Response[]
+
+  @@index([passageId])
+  @@index([sourceId])
+}
+
 model KnowledgeLink {
-  id String @id @default(cuid())
+  id       String   @id @default(cuid())
   fromType String
-  fromId String
-  toType String
-  toId String
-  kind LinkKind
-  weight Float @default(1)
-  evidence String? @db.Text
-  @@index([fromType,fromId])
-  @@index([toType,toId])
+  fromId   String
+  toType   String
+  toId     String
+  kind     LinkKind
+  weight   Float    @default(1)
+  evidence String?  @db.Text
+
+  @@index([fromType, fromId])
+  @@index([toType, toId])
 }
+
 model PopularitySignal {
-  id String @id @default(cuid())
+  id         String   @id @default(cuid())
   questionId String
-  bucket DateTime
-  count Int @default(1)
-  question Question @relation(fields:[questionId], references:[id], onDelete:Cascade)
-  @@unique([questionId,bucket])
+  bucket     DateTime
+  count      Int      @default(1)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([questionId, bucket])
+}
+
+model PersonEditorialRole {
+  id       String        @id @default(cuid())
+  personId String
+  corpusId String?
+  role     EditorialRole
+  person   Person        @relation(fields: [personId], references: [id], onDelete: Cascade)
+  corpus   Corpus?       @relation(fields: [corpusId], references: [id], onDelete: Cascade)
+
+  @@index([personId, role])
+  @@index([corpusId, role])
+}
+
+model EditorialDecision {
+  id         String       @id @default(cuid())
+  entityType String
+  entityId   String
+  reviewerId String?
+  status     ReviewStatus
+  reason     String?      @db.Text
+  evidence   String?      @db.Text
+  createdAt  DateTime     @default(now())
+  reviewer   Person?      @relation("EditorialReviewer", fields: [reviewerId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([status])
+}
+
+model Submission {
+  id                  String          @id @default(cuid())
+  title               String?
+  sourceUrl           String?
+  notes               String?         @db.Text
+  submittedByPersonId String?
+  sourceId            String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  submittedBy         Person?         @relation("SubmissionSubmitter", fields: [submittedByPersonId], references: [id])
+  source              Source?         @relation(fields: [sourceId], references: [id])
+  ingestionRuns       IngestionRun[]
+}
+
+model IngestionRun {
+  id            String             @id @default(cuid())
+  submissionId  String?
+  sourceId      String?
+  stage         IngestionStage
+  status        IngestionRunStatus @default(QUEUED)
+  parserVersion String?
+  rawChecksum   String?
+  error         String?            @db.Text
+  startedAt     DateTime?
+  finishedAt    DateTime?
+  createdAt     DateTime           @default(now())
+  submission    Submission?        @relation(fields: [submissionId], references: [id], onDelete: SetNull)
+  source        Source?            @relation(fields: [sourceId], references: [id])
+
+  @@index([stage, status])
 }
