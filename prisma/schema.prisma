@@ -11,6 +11,8 @@ model Tradition {
   name String @unique
   schools School[]
   authors Author[]
+  interpretations Interpretation[]
+  claims Claim[]
 }
 model School {
   id String @id @default(cuid())
@@ -82,6 +84,7 @@ model Interpretation {
   summary String? @db.Text
   verse Verse? @relation(fields:[verseId], references:[id])
   section WorkSection @relation(fields:[sectionId], references:[id])
+  tradition Tradition? @relation(fields:[traditionId], references:[id])
   @@index([verseId])
 }
 model Question {
@@ -105,6 +108,7 @@ model Claim {
   text String @db.Text
   traditionId String?
   sourceSectionId String?
+  tradition Tradition? @relation(fields:[traditionId], references:[id])
 }
 model KnowledgeLink {
   id String @id @default(cuid())
