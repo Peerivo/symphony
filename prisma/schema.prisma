@@ -1,0 +1,128 @@
+// M1 conceptual Prisma schema. Extend via migrations; production deploys migrations through GitHub Actions.
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") directUrl = env("DIRECT_URL") }
+
+enum RightsStatus { UNKNOWN PUBLIC_DOMAIN LICENSED PERMISSION_GRANTED LINK_ONLY RESTRICTED }
+enum SourceKind { SCRIPTURE PATRISTIC WORK COUNCIL LITURGICAL COMMENTARY CONFESSIONAL TAFSIR HADITH ARTICLE BOOK USER_QUESTION OTHER }
+enum LinkKind { INTERPRETS SUPPORTS OPPOSES PARALLEL_TO REFERENCES ABOUT ANSWERS RELATED_TO }
+
+model Tradition {
+  id String @id @default(cuid())
+  name String @unique
+  schools School[]
+  authors Author[]
+}
+model School {
+  id String @id @default(cuid())
+  name String
+  traditionId String
+  tradition Tradition @relation(fields:[traditionId], references:[id])
+  @@unique([traditionId,name])
+}
+model Author {
+  id String @id @default(cuid())
+  name String
+  traditionId String?
+  tradition Tradition? @relation(fields:[traditionId], references:[id])
+  works Work[]
+}
+model Source {
+  id String @id @default(cuid())
+  name String
+  kind SourceKind
+  canonicalUrl String?
+  rightsStatus RightsStatus @default(UNKNOWN)
+  rightsEvidence String?
+  license String?
+  fetchedAt DateTime?
+  checksum String?
+  parserVersion String?
+  works Work[]
+}
+model Work {
+  id String @id @default(cuid())
+  title String
+  authorId String?
+  sourceId String
+  language String?
+  author Author? @relation(fields:[authorId], references:[id])
+  source Source @relation(fields:[sourceId], references:[id])
+  sections WorkSection[]
+}
+model WorkSection {
+  id String @id @default(cuid())
+  workId String
+  parentId String?
+  ordinal Int
+  heading String?
+  text String @db.Text
+  locator String?
+  work Work @relation(fields:[workId], references:[id], onDelete:Cascade)
+  parent WorkSection? @relation("SectionTree", fields:[parentId], references:[id])
+  children WorkSection[] @relation("SectionTree")
+  interpretations Interpretation[]
+  @@index([workId,ordinal])
+}
+model Verse {
+  id String @id @default(cuid())
+  osis String @unique
+  book String
+  chapter Int
+  verse Int
+  text String @db.Text
+  interpretations Interpretation[]
+  questionLinks QuestionVerse[]
+  @@index([book,chapter,verse])
+}
+model Interpretation {
+  id String @id @default(cuid())
+  verseId String?
+  sectionId String
+  traditionId String?
+  summary String? @db.Text
+  verse Verse? @relation(fields:[verseId], references:[id])
+  section WorkSection @relation(fields:[sectionId], references:[id])
+  @@index([verseId])
+}
+model Question {
+  id String @id @default(cuid())
+  canonicalText String @db.Text
+  normalizedKey String @unique
+  createdAt DateTime @default(now())
+  verses QuestionVerse[]
+  signals PopularitySignal[]
+}
+model QuestionVerse {
+  questionId String
+  verseId String
+  relevance Float @default(1)
+  question Question @relation(fields:[questionId], references:[id], onDelete:Cascade)
+  verse Verse @relation(fields:[verseId], references:[id], onDelete:Cascade)
+  @@id([questionId,verseId])
+}
+model Claim {
+  id String @id @default(cuid())
+  text String @db.Text
+  traditionId String?
+  sourceSectionId String?
+}
+model KnowledgeLink {
+  id String @id @default(cuid())
+  fromType String
+  fromId String
+  toType String
+  toId String
+  kind LinkKind
+  weight Float @default(1)
+  evidence String? @db.Text
+  @@index([fromType,fromId])
+  @@index([toType,toId])
+}
+model PopularitySignal {
+  id String @id @default(cuid())
+  questionId String
+  bucket DateTime
+  count Int @default(1)
+  question Question @relation(fields:[questionId], references:[id], onDelete:Cascade)
+  @@unique([questionId,bucket])
+}
