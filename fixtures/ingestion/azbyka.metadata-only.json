@@ -1,0 +1,22 @@
+{
+  "mode": "METADATA_ONLY",
+  "source": {
+    "name": "Азбука веры",
+    "kind": "OTHER",
+    "canonicalUrl": "https://azbyka.ru/",
+    "rightsStatus": "LINK_ONLY",
+    "rightsEvidence": "Full-text mirroring is disabled until explicit rights/permission evidence is recorded.",
+    "parserVersion": "m1"
+  },
+  "corpus": {
+    "slug": "azbyka-link-registry",
+    "name": "Азбука веры — registry",
+    "kind": "COMMENTARY",
+    "language": "ru",
+    "tradition": {
+      "slug": "orthodox",
+      "name": "Православие"
+    }
+  },
+  "works": []
+}
