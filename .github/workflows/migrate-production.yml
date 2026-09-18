@@ -1,0 +1,20 @@
+name: Deploy production migrations
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["prisma/migrations/**"]
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install
+      - run: npm run db:deploy:production
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
