@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { QuestionBox } from "../../../components/QuestionBox";
+import { ViewTracker } from "../../../components/ViewTracker";
 import { getVersePage } from "../../../lib/verse-page";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,7 @@ export default async function VersePage({ params }: { params: Promise<{ osis: st
 
   return (
     <main>
+      <ViewTracker osis={verse.osis} />
       <a href="/">← Симфония</a>
       <p className="eyebrow">{p.work.corpus.name}</p>
       <h1>{verse.book} {verse.chapter}:{verse.verse}</h1>
