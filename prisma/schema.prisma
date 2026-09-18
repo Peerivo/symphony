@@ -63,6 +63,7 @@ model Author {
   traditionId String?
   tradition Tradition? @relation(fields:[traditionId], references:[id])
   works Work[]
+  verses Verse[]
 }
 model Source {
   id String @id @default(cuid())
@@ -108,6 +109,9 @@ model Verse {
   chapter Int
   verse Int
   text String @db.Text
+  edition String?
+  sourceId String?
+  source Source? @relation(fields:[sourceId], references:[id])
   interpretations Interpretation[]
   questionLinks QuestionVerse[]
   @@index([book,chapter,verse])
