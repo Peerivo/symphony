@@ -233,6 +233,7 @@ model Passage {
   fragments       SourceFragment[]
   questionLinks   QuestionPassage[]
   claimLinks      ClaimPassage[]
+  viewSignals     PassagePopularitySignal[]
 
   @@index([workId, ordinal])
   @@index([kind])
@@ -493,4 +494,15 @@ model IngestionRun {
   source        Source?            @relation(fields: [sourceId], references: [id])
 
   @@index([stage, status])
+}
+
+model PassagePopularitySignal {
+  id        String   @id @default(cuid())
+  passageId String
+  bucket    DateTime
+  count     Int      @default(1)
+  passage   Passage  @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@unique([passageId, bucket])
+  @@index([bucket])
 }
