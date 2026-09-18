@@ -1,0 +1,31 @@
+{
+  "mode": "FULL_TEXT",
+  "source": {
+    "name": "Denied source fixture",
+    "kind": "COMMENTARY",
+    "canonicalUrl": "https://example.invalid/denied-source",
+    "rightsStatus": "LINK_ONLY",
+    "rightsEvidence": "CI fixture: full text must be denied.",
+    "parserVersion": "ci"
+  },
+  "corpus": {
+    "slug": "denied-ci-fixture",
+    "name": "Denied CI fixture",
+    "kind": "COMMENTARY",
+    "language": "ru"
+  },
+  "works": [
+    {
+      "key": "ci:denied:work",
+      "title": "Must not ingest",
+      "passages": [
+        {
+          "key": "ci:denied:passage",
+          "ordinal": 1,
+          "kind": "PARAGRAPH",
+          "text": "This text must never be written."
+        }
+      ]
+    }
+  ]
+}
