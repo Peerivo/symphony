@@ -1,10 +1,10 @@
 // M1 conceptual Prisma schema. Extend via migrations; production deploys migrations through GitHub Actions.
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql" url = env("DATABASE_URL") directUrl = env("DIRECT_URL") }
+generator client {\n  provider = "prisma-client-js"\n}
+datasource db {\n  provider  = "postgresql"\n  url       = env("DATABASE_URL")\n  directUrl = env("DIRECT_URL")\n}
 
-enum RightsStatus { UNKNOWN PUBLIC_DOMAIN LICENSED PERMISSION_GRANTED LINK_ONLY RESTRICTED }
-enum SourceKind { SCRIPTURE PATRISTIC WORK COUNCIL LITURGICAL COMMENTARY CONFESSIONAL TAFSIR HADITH ARTICLE BOOK USER_QUESTION OTHER }
-enum LinkKind { INTERPRETS SUPPORTS OPPOSES PARALLEL_TO REFERENCES ABOUT ANSWERS RELATED_TO }
+enum RightsStatus {\n  UNKNOWN\n  PUBLIC_DOMAIN\n  LICENSED\n  PERMISSION_GRANTED\n  LINK_ONLY\n  RESTRICTED\n}
+enum SourceKind {\n  SCRIPTURE\n  PATRISTIC\n  WORK\n  COUNCIL\n  LITURGICAL\n  COMMENTARY\n  CONFESSIONAL\n  TAFSIR\n  HADITH\n  ARTICLE\n  BOOK\n  USER_QUESTION\n  OTHER\n}
+enum LinkKind {\n  INTERPRETS\n  SUPPORTS\n  OPPOSES\n  PARALLEL_TO\n  REFERENCES\n  ABOUT\n  ANSWERS\n  RELATED_TO\n}
 
 model Tradition {
   id String @id @default(cuid())
