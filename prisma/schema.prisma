@@ -165,7 +165,7 @@ model Source {
   id             String           @id @default(cuid())
   name           String
   kind           SourceKind
-  canonicalUrl   String?
+  canonicalUrl   String?          @unique
   rightsStatus   RightsStatus     @default(UNKNOWN)
   rightsEvidence String?          @db.Text
   license        String?
@@ -198,6 +198,7 @@ model Work {
   id            String    @id @default(cuid())
   corpusId      String
   title         String
+  importKey     String?   @unique
   authorId      String?
   sourceId      String?
   language      String?
@@ -214,6 +215,7 @@ model Work {
 model Passage {
   id              String           @id @default(cuid())
   workId          String
+  importKey       String?          @unique
   parentId        String?
   sourceId        String?
   ordinal         Int
