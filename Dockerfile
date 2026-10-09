@@ -8,8 +8,10 @@ RUN npx prisma generate
 
 FROM deps AS build
 COPY . .
+ARG RELEASE_SHA
+ENV RELEASE_SHA=$RELEASE_SHA
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+RUN node -e "if (!/^[0-9a-f]{40}$/.test(process.env.RELEASE_SHA || '')) process.exit(1)" && npm run build
 
 FROM node:24-bookworm-slim AS runtime
 WORKDIR /app

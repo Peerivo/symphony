@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { defineLayoutScenarios } from './layout-scenarios';
+
+defineLayoutScenarios();
 
 test('read-only scripture journey, sources and interrupted navigation', async({page,request}, testInfo)=>{
   await page.goto('/');
@@ -23,7 +26,7 @@ test('read-only scripture journey, sources and interrupted navigation', async({p
   expect(await page.getByRole('link').count()).toBeGreaterThan(30);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   const health = await request.get('/api/health'); expect(health.status()).toBe(200); expect((await health.json()).status).toBe('ok');
-  const disabled = await request.post('/api/questions',{headers:{origin:'http://127.0.0.1:34391'},data:{text:'Synthetic draft only',osis:'John.3.16',consent:true}});
+  const disabled = await request.post('/api/questions',{headers:{origin:new URL(page.url()).origin},data:{text:'Synthetic draft only',osis:'John.3.16',consent:true}});
   expect(disabled.status()).toBe(503); expect(await disabled.json()).toEqual({error:'intake_disabled'});
 });
 test('approximate quotation, unknown query and nonexistent verse stay honest', async({page})=>{

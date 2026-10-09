@@ -1,0 +1,108 @@
+{
+  "task_id": "work-production-verification-20261009",
+  "repository": "Peerivo/symphony",
+  "owner": "olegka85",
+  "authorization": "2026-10-09 explicit Work production-readiness task",
+  "before_sha": "71e89ff86329a3e24af2e53f3f9721b070577bf8",
+  "branch": "fix/work-production-verification-20261009",
+  "environment": "current ChatGPT Work; isolated loopback test endpoints only",
+  "global_contract_ref": {
+    "id": "peerivo-global",
+    "version": "1.13.0",
+    "digest": "sha256:29547b15a800bb9c2e8dc79ba544fff47cf3002670aee28833a641aa156710c1",
+    "git_sha": "cfe62ac4e9a69826178ae69f2ced4a0e8d20307f",
+    "resolved_at": "2026-10-09T19:05:44.198884+00:00",
+    "verification_state": "verified"
+  },
+  "accepted_at": "2026-10-09T19:11:06.581656+00:00",
+  "decisions": [
+    "35-verse read-only pilot; do not claim full corpus",
+    "Preserve authentic eBible text and metadata, LINK_ONLY Azbyka",
+    "Keep question intake disabled and PR #2 unchanged",
+    "No GitHub Actions, no server CI transfer, no production test bench",
+    "Production DDL remains blocked until separately approved migration route",
+    "No paid resources, no organization/branch-protection weakening"
+  ],
+  "scenarios": [
+    {
+      "id": "reading-320",
+      "viewport": {
+        "width": 320,
+        "height": 740
+      },
+      "required": true,
+      "flow": "search to verse to source; back/forward/reload; no horizontal overflow; keyboard controls"
+    },
+    {
+      "id": "reading-390",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "required": true,
+      "flow": "search to verse to source; back/forward/reload; no horizontal overflow; keyboard controls"
+    },
+    {
+      "id": "reading-768",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "required": true,
+      "flow": "search to verse to source; back/forward/reload; no horizontal overflow; keyboard controls"
+    },
+    {
+      "id": "reading-1440",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "required": true,
+      "flow": "search to verse to source; back/forward/reload; no horizontal overflow; keyboard controls"
+    },
+    {
+      "id": "db-isolation-and-ingestion",
+      "required": true
+    },
+    {
+      "id": "rights-and-source-exactness",
+      "required": true
+    },
+    {
+      "id": "min-runtime-role-rls",
+      "required": true
+    },
+    {
+      "id": "container-nonroot-health",
+      "required": true
+    },
+    {
+      "id": "live-https-release",
+      "required": true
+    }
+  ],
+  "current_blockers": [
+    "Work allows only mapped UID 0; standard PostgreSQL nonroot startup fails",
+    "Docker binary/socket unavailable",
+    "No Symphony database/roles on Beget",
+    "Production migration route conflicts with Actions prohibition",
+    "No dedicated backup/restore evidence or previous release"
+  ],
+  "memory_context": {
+    "state": "legacy_unverified",
+    "project_digest": "d2946232348de314b85271fac4ed95fbc7311a4dcb6b33b7a20f1ba709298a5a",
+    "generated_at": "2026-10-09T13:20:38.009Z",
+    "reason": "Loaded current bounded context lacks a Global envelope; not silently attested"
+  },
+  "bugs": [
+    {
+      "id": "long-search-overflow",
+      "before_sha": "71e89ff86329a3e24af2e53f3f9721b070577bf8",
+      "reproduced": true,
+      "assertion": "document.documentElement.scrollWidth <= innerWidth",
+      "input": "400 underscore characters (no corpus/database lookup)",
+      "evidence": "overflow-before.json",
+      "decision": "Permit heading/text line wraps within main; preserve font, colors, form and navigation"
+    }
+  ]
+}
