@@ -2,8 +2,9 @@ import { searchCorpus } from "../../lib/search";
 
 export const dynamic = "force-dynamic";
 
-export default async function Search({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const { q = "" } = await searchParams;
+export default async function Search({ searchParams }: { searchParams: Promise<{ q?: string | string[] }> }) {
+  const { q: rawQuery = "" } = await searchParams;
+  const q = (typeof rawQuery === "string" ? rawQuery : rawQuery[0] || "").slice(0, 500);
   const results = q ? await searchCorpus(q) : { verses: [], questions: [], claims: [], fragments: [] };
   const total = results.verses.length + results.questions.length + results.claims.length + results.fragments.length;
 
@@ -13,14 +14,14 @@ export default async function Search({ searchParams }: { searchParams: Promise<{
       <p className="eyebrow">ПОИСК ПО ВСЕМУ КОРПУСУ</p>
       <h1>{q ? "«" + q + "»" : "Введите стих, цитату или вопрос"}</h1>
       <form>
-        <input name="q" defaultValue={q} placeholder="Еф 4:14 или «мне сказали, что…»" />
+        <input name="q" aria-label="Стих, цитата или вопрос" maxLength={500} defaultValue={q} placeholder="Еф 4:14 или «мне сказали, что…»" />
         <button>Найти</button>
       </form>
 
       {q && total === 0 && (
         <section className="result">
           <h2>В корпусе пока нет готового совпадения</h2>
-          <p>Вопрос можно задать на странице связанного места Писания; после нормализации он становится частью общего графа Симфонии.</p>
+          <p>Попробуйте ссылку на стих или слова из цитаты. Стартовый корпус содержит 35 стихов; отсутствие совпадения не означает, что такого места нет в полном тексте.</p>
         </section>
       )}
 
@@ -28,7 +29,7 @@ export default async function Search({ searchParams }: { searchParams: Promise<{
         <p className="eyebrow">ПИСАНИЕ</p>
         <h2>Места</h2>
         {results.verses.map(v => <article className="evidence" key={v.id}>
-          <h3><a href={"/verse/" + v.osis}>{v.book} {v.chapter}:{v.verse}</a></h3>
+          <h3><a href={"/verse/" + v.osis}>{v.passage.work.title} {v.chapter}:{v.verse}</a></h3>
           <p>{v.passage.text}</p>
           <small>{v.passage.work.corpus.name} · {v.passage.work.title}</small>
         </article>)}

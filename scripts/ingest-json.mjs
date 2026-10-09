@@ -1,182 +1,170 @@
 import fs from "node:fs/promises";
-import { PrismaClient } from "@prisma/client";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
+import { createHash } from "node:crypto";
+import { orderPassages, validateManifest } from "./ingestion-contract.mjs";
 
-const prisma = new PrismaClient();
-const FULL_TEXT_RIGHTS = new Set(["PUBLIC_DOMAIN","LICENSED","PERMISSION_GRANTED"]);
+export { validateManifest } from "./ingestion-contract.mjs";
 
-function fail(message) { throw new Error(message); }
-function required(value, name) { if (!value) fail("Missing "+name); return value; }
-
-async function main() {
-  const file = process.argv[2];
-  required(file, "manifest path");
-  const manifest = JSON.parse(await fs.readFile(file, "utf8"));
-
-  const mode = required(manifest.mode, "mode");
-  const src = required(manifest.source, "source");
-  const canonicalUrl = required(src.canonicalUrl, "source.canonicalUrl");
-  const rightsStatus = required(src.rightsStatus, "source.rightsStatus");
-
-  if (mode === "FULL_TEXT" && !FULL_TEXT_RIGHTS.has(rightsStatus)) {
-    fail("FULL_TEXT denied for rightsStatus="+rightsStatus);
+export class IngestionConflictError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "IngestionConflictError";
   }
-  if (!["FULL_TEXT","METADATA_ONLY"].includes(mode)) fail("Unsupported mode");
-  if (mode === "METADATA_ONLY" && manifest.works?.some(w => w.passages?.length)) {
-    fail("METADATA_ONLY manifest cannot contain passage text");
-  }
+}
 
-  const source = await prisma.source.upsert({
-    where: { canonicalUrl },
-    update: {
-      name: src.name,
-      kind: src.kind,
-      rightsStatus,
-      rightsEvidence: src.rightsEvidence ?? null,
-      license: src.license ?? null,
-      checksum: src.checksum ?? null,
-      parserVersion: src.parserVersion ?? null,
-      fetchedAt: src.fetchedAt ? new Date(src.fetchedAt) : null,
-    },
-    create: {
-      name: required(src.name, "source.name"),
-      kind: required(src.kind, "source.kind"),
-      canonicalUrl,
-      rightsStatus,
-      rightsEvidence: src.rightsEvidence ?? null,
-      license: src.license ?? null,
-      checksum: src.checksum ?? null,
-      parserVersion: src.parserVersion ?? null,
-      fetchedAt: src.fetchedAt ? new Date(src.fetchedAt) : null,
-    },
-  });
-
-  let tradition = null;
-  if (manifest.corpus?.tradition) {
-    const t = manifest.corpus.tradition;
-    tradition = await prisma.tradition.upsert({
-      where: { slug: required(t.slug, "corpus.tradition.slug") },
-      update: { name: required(t.name, "corpus.tradition.name") },
-      create: { slug: t.slug, name: t.name },
-    });
-  }
-
-  const corpusDef = required(manifest.corpus, "corpus");
-  const corpus = await prisma.corpus.upsert({
-    where: { slug: required(corpusDef.slug, "corpus.slug") },
-    update: {
-      name: corpusDef.name,
-      kind: corpusDef.kind,
-      language: corpusDef.language ?? null,
-      sourceId: source.id,
-      traditionId: tradition?.id ?? null,
-    },
-    create: {
-      slug: corpusDef.slug,
-      name: required(corpusDef.name, "corpus.name"),
-      kind: required(corpusDef.kind, "corpus.kind"),
-      language: corpusDef.language ?? null,
-      sourceId: source.id,
-      traditionId: tradition?.id ?? null,
-    },
-  });
-
-  for (const workDef of manifest.works ?? []) {
-    const importKey = required(workDef.key, "work.key");
-    let author = null;
-    if (workDef.author) {
-      const a = workDef.author;
-      const slug = required(a.slug, "work.author.slug");
-      author = await prisma.person.upsert({
-        where: { slug },
-        update: { name: a.name, traditionId: tradition?.id ?? null },
-        create: { slug, name: required(a.name, "work.author.name"), traditionId: tradition?.id ?? null },
-      });
+function sameValue(actual, expected) {
+  if (actual instanceof Date || expected instanceof Date) return new Date(actual).getTime() === new Date(expected).getTime();
+  return actual === expected;
+}
+function assertSame(existing, data, label) {
+  for (const [field, value] of Object.entries(data)) {
+    if (!sameValue(existing[field], value)) {
+      throw new IngestionConflictError(`${label}: ${field} conflicts with an existing record; use explicit reviewed versioning instead of overwriting provenance`);
     }
+  }
+}
+async function immutableRecord(model, where, data, label, { compare = data, createOnly = {} } = {}) {
+  const existing = await model.findUnique({ where });
+  if (existing) {
+    assertSame(existing, compare, label);
+    return existing;
+  }
+  return model.create({ data: { ...data, ...createOnly } });
+}
+function importTime(now) {
+  const date = new Date(now());
+  if (!Number.isFinite(date.getTime())) throw new Error("The ingestion clock returned an invalid timestamp");
+  return date;
+}
 
-    const work = await prisma.work.upsert({
-      where: { importKey },
-      update: {
-        corpusId: corpus.id,
-        title: workDef.title,
-        authorId: author?.id ?? null,
-        sourceId: source.id,
-        language: workDef.language ?? corpusDef.language ?? null,
-        edition: workDef.edition ?? null,
-        publishedYear: workDef.publishedYear ?? null,
-      },
-      create: {
-        importKey,
-        corpusId: corpus.id,
-        title: required(workDef.title, "work.title"),
-        authorId: author?.id ?? null,
-        sourceId: source.id,
-        language: workDef.language ?? corpusDef.language ?? null,
-        edition: workDef.edition ?? null,
-        publishedYear: workDef.publishedYear ?? null,
-      },
-    });
+/**
+ * Append-only normalization. Every successful attempt has an immutable manifest
+ * audit in Submission.notes and its own IngestionRun. The original Source
+ * snapshot is retained; later retrieval/parser metadata belongs to the new run.
+ * The current schema cannot safely revise published passages or rights evidence,
+ * so conflicting stable identities fail closed until explicit versioning exists.
+ *
+ * Inject a Prisma-compatible client (and optionally a clock) for integration tests.
+ */
+export async function importManifest(prisma, input, { now = () => new Date() } = {}) {
+  const manifest = validateManifest(input);
+  const snapshot = JSON.stringify(manifest);
+  const manifestChecksum = `sha256:${createHash("sha256").update(snapshot).digest("hex")}`;
+  const startedAt = importTime(now);
 
-    if (mode !== "FULL_TEXT") continue;
+  const ingest = async (tx) => {
+    const { source: src, corpus: c } = manifest;
+    const sourceData = { ...src, fetchedAt: new Date(src.fetchedAt) };
+    const { fetchedAt: _fetchedAt, checksum: _checksum, parserVersion: _parserVersion, ...sourceIdentity } = sourceData;
+    const source = await immutableRecord(tx.source, { canonicalUrl: src.canonicalUrl }, sourceData, `Source ${src.canonicalUrl}`, { compare: sourceIdentity });
+    if (!source.fetchedAt || !/^sha256:[a-fA-F0-9]{64}$/.test(source.checksum ?? "") || !source.parserVersion?.trim()) {
+      throw new IngestionConflictError("Existing Source has incomplete provenance; explicit reconciliation is required");
+    }
+    const tradition = c.tradition
+      ? await immutableRecord(tx.tradition, { slug: c.tradition.slug }, c.tradition, `Tradition ${c.tradition.slug}`)
+      : null;
+    const corpus = await immutableRecord(tx.corpus, { slug: c.slug }, {
+      slug: c.slug, name: c.name, kind: c.kind, language: c.language,
+      sourceId: source.id, traditionId: tradition?.id ?? null,
+    }, `Corpus ${c.slug}`);
 
-    const byKey = new Map();
-    for (const p of workDef.passages ?? []) {
-      const key = required(p.key, "passage.key");
-      const passage = await prisma.passage.upsert({
-        where: { importKey: key },
-        update: {
-          workId: work.id,
-          sourceId: source.id,
-          ordinal: p.ordinal,
-          kind: p.kind ?? "PARAGRAPH",
-          heading: p.heading ?? null,
-          text: required(p.text, "passage.text"),
-          locator: p.locator ?? null,
-          language: p.language ?? workDef.language ?? corpusDef.language ?? null,
-        },
-        create: {
-          importKey: key,
-          workId: work.id,
-          sourceId: source.id,
-          ordinal: required(p.ordinal, "passage.ordinal"),
-          kind: p.kind ?? "PARAGRAPH",
-          heading: p.heading ?? null,
-          text: required(p.text, "passage.text"),
-          locator: p.locator ?? null,
-          language: p.language ?? workDef.language ?? corpusDef.language ?? null,
-        },
-      });
-      byKey.set(key, passage.id);
+    let passageCount = 0;
+    for (const w of manifest.works) {
+      const author = w.author ? await immutableRecord(tx.person, { slug: w.author.slug }, {
+        ...w.author, traditionId: tradition?.id ?? null,
+      }, `Author ${w.author.slug}`) : null;
+      const work = await immutableRecord(tx.work, { importKey: w.key }, {
+        importKey: w.key, corpusId: corpus.id, sourceId: source.id,
+        title: w.title, authorId: author?.id ?? null,
+        language: w.language, edition: w.edition, publishedYear: w.publishedYear,
+      }, `Work ${w.key}`);
 
-      if (p.verse) {
-        await prisma.verse.upsert({
-          where: { osis: required(p.verse.osis, "passage.verse.osis") },
-          update: {
-            passageId: passage.id,
-            book: p.verse.book,
-            chapter: p.verse.chapter,
-            verse: p.verse.verse,
-          },
-          create: {
-            passageId: passage.id,
-            osis: p.verse.osis,
-            book: required(p.verse.book, "passage.verse.book"),
-            chapter: required(p.verse.chapter, "passage.verse.chapter"),
-            verse: required(p.verse.verse, "passage.verse.verse"),
-          },
-        });
+      const byKey = new Map();
+      for (const p of orderPassages(w.passages)) {
+        const passage = await immutableRecord(tx.passage, { importKey: p.key }, {
+          importKey: p.key, workId: work.id, sourceId: source.id,
+          parentId: p.parentKey == null ? null : byKey.get(p.parentKey),
+          ordinal: p.ordinal, kind: p.kind, heading: p.heading, text: p.text,
+          locator: p.locator, language: p.language,
+        }, `Passage ${p.key}`, { createOnly: { reviewStatus: "DRAFT" } });
+        byKey.set(p.key, passage.id);
+        passageCount++;
+
+        // Both unique constraints matter: neither OSIS nor passage ownership can
+        // be rebound, including when a new edition uses an existing OSIS index.
+        const currentVerse = await tx.verse.findUnique({ where: { passageId: passage.id } });
+        if (p.verse) {
+          const verseData = { ...p.verse, passageId: passage.id };
+          if (currentVerse) assertSame(currentVerse, verseData, `Verse for passage ${p.key}`);
+          await immutableRecord(tx.verse, { osis: p.verse.osis }, verseData, `Verse ${p.verse.osis}`);
+        } else if (currentVerse) {
+          throw new IngestionConflictError(`Passage ${p.key} already has a verse index; omission cannot silently remove its provenance`);
+        }
       }
     }
 
-    for (const p of workDef.passages ?? []) {
-      if (!p.parentKey) continue;
-      const id = byKey.get(p.key);
-      const parentId = byKey.get(p.parentKey);
-      if (!id || !parentId) fail("Unknown parentKey="+p.parentKey);
-      await prisma.passage.update({ where: { id }, data: { parentId } });
+    // The schema has no run-manifest column. Preserve the entire validated
+    // manifest in the existing submission audit, linked atomically to the run.
+    const submission = await tx.submission.create({ data: {
+      title: `JSON ingestion v1: ${c.name}`,
+      sourceUrl: src.canonicalUrl, sourceId: source.id,
+      notes: JSON.stringify({ adapter: "symphony-json", manifestChecksum, manifest }),
+    } });
+    const run = await tx.ingestionRun.create({ data: {
+      submissionId: submission.id, sourceId: source.id, stage: "EXTRACTION",
+      status: "SUCCEEDED", parserVersion: src.parserVersion, rawChecksum: src.checksum,
+      startedAt, finishedAt: importTime(now),
+    } });
+    return {
+      sourceId: source.id, corpusId: corpus.id, submissionId: submission.id,
+      ingestionRunId: run.id, mode: manifest.mode, manifestChecksum,
+      works: manifest.works.length, passages: passageCount,
+    };
+  };
+
+  // Serializable isolation + uniqueness guards close check/create races. A retry
+  // rechecks all identities in a fresh transaction; no partial import survives.
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await prisma.$transaction(ingest, { isolationLevel: "Serializable", maxWait: 5000, timeout: 60000 });
+    } catch (error) {
+      if (attempt >= 2 || !["P2034", "P2002"].includes(error?.code)) throw error;
     }
   }
-
-  console.log(JSON.stringify({ sourceId: source.id, corpusId: corpus.id, mode }, null, 2));
 }
 
-main().finally(() => prisma.$disconnect());
+export async function readManifest(file) {
+  return JSON.parse(await fs.readFile(file, "utf8"));
+}
+
+/** Validation-only mode deliberately never loads Prisma or connects to a DB. */
+export async function runCli(args = process.argv.slice(2), { log = console.log, createClient } = {}) {
+  const validateOnly = args.includes("--validate-only");
+  const files = args.filter((arg) => arg !== "--validate-only");
+  if (files.length !== 1 || files[0].startsWith("-") || args.filter((arg) => arg === "--validate-only").length > 1) {
+    throw new Error("Usage: node scripts/ingest-json.mjs [--validate-only] <manifest.json>");
+  }
+  const manifest = validateManifest(await readManifest(files[0]));
+  if (validateOnly) {
+    const result = { valid: true, manifestVersion: manifest.manifestVersion, mode: manifest.mode, works: manifest.works.length, passages: manifest.works.reduce((sum, w) => sum + w.passages.length, 0) };
+    log(JSON.stringify(result, null, 2));
+    return result;
+  }
+  const client = createClient ? await createClient() : new (await import("@prisma/client")).PrismaClient();
+  try {
+    const result = await importManifest(client, manifest);
+    log(JSON.stringify(result, null, 2));
+    return result;
+  } finally {
+    await client.$disconnect();
+  }
+}
+
+const invokedDirectly = process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href;
+if (invokedDirectly) {
+  runCli().catch((error) => {
+    console.error(`${error.name}: ${error.message}`);
+    process.exitCode = 1;
+  });
+}

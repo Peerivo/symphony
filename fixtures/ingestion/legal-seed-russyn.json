@@ -1,0 +1,553 @@
+{
+  "manifestVersion": 1,
+  "mode": "FULL_TEXT",
+  "source": {
+    "name": "Синодальный перевод — eBible.org (проверенная стартовая подборка)",
+    "kind": "SCRIPTURE",
+    "canonicalUrl": "https://ebible.org/russyn/",
+    "rightsStatus": "PUBLIC_DOMAIN",
+    "rightsEvidence": "Publisher-hosted edition declares Public Domain and Russian language at https://ebible.org/russyn/copyright.htm (retrieved 2026-10-09). Exact rights-page and chapter HTML bytes are archived in legal-seed-snapshots.json with per-document SHA-256. Only verse text is imported; no modern commentary, site assets or Azbyka text. Psalm numbering is preserved from this russyn edition.",
+    "license": "Public Domain (publisher declaration)",
+    "fetchedAt": "2026-10-09T08:36:11Z",
+    "checksum": "sha256:ef31f60b1591245df8d865e3d2ff00e260e2264ae13c977eb50ae9f1b26baa31",
+    "parserVersion": "symphony-ebible-html-excerpt/1.0.0"
+  },
+  "corpus": {
+    "slug": "russyn-public-domain-seed",
+    "name": "Синодальный перевод · стартовая подборка (35 стихов)",
+    "kind": "SCRIPTURE",
+    "language": "ru"
+  },
+  "works": [
+    {
+      "key": "ebible:russyn:seed-v1:Gen",
+      "title": "Бытие",
+      "language": "ru",
+      "edition": "Синодальный перевод · eBible.org russyn · источник 2025-12-12",
+      "passages": [
+        {
+          "key": "ebible:russyn:seed-v1:Gen.1.1",
+          "ordinal": 1001,
+          "kind": "VERSE",
+          "text": "В начале сотворил Бог небо и землю.",
+          "locator": "https://ebible.org/russyn/GEN01.htm#V1",
+          "language": "ru",
+          "verse": {
+            "osis": "Gen.1.1",
+            "book": "Gen",
+            "chapter": 1,
+            "verse": 1
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:Gen.1.2",
+          "ordinal": 1002,
+          "kind": "VERSE",
+          "text": "Земля же была безвидна и пуста, и тьма над бездною, и Дух Божий носился над водою.",
+          "locator": "https://ebible.org/russyn/GEN01.htm#V2",
+          "language": "ru",
+          "verse": {
+            "osis": "Gen.1.2",
+            "book": "Gen",
+            "chapter": 1,
+            "verse": 2
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:Gen.1.3",
+          "ordinal": 1003,
+          "kind": "VERSE",
+          "text": "И сказал Бог: да будет свет. И стал свет.",
+          "locator": "https://ebible.org/russyn/GEN01.htm#V3",
+          "language": "ru",
+          "verse": {
+            "osis": "Gen.1.3",
+            "book": "Gen",
+            "chapter": 1,
+            "verse": 3
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:Gen.1.4",
+          "ordinal": 1004,
+          "kind": "VERSE",
+          "text": "И увидел Бог свет, что он хорош, и отделил Бог свет от тьмы.",
+          "locator": "https://ebible.org/russyn/GEN01.htm#V4",
+          "language": "ru",
+          "verse": {
+            "osis": "Gen.1.4",
+            "book": "Gen",
+            "chapter": 1,
+            "verse": 4
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:Gen.1.5",
+          "ordinal": 1005,
+          "kind": "VERSE",
+          "text": "И назвал Бог свет днем, а тьму ночью. И был вечер, и было утро: день один.",
+          "locator": "https://ebible.org/russyn/GEN01.htm#V5",
+          "language": "ru",
+          "verse": {
+            "osis": "Gen.1.5",
+            "book": "Gen",
+            "chapter": 1,
+            "verse": 5
+          }
+        }
+      ]
+    },
+    {
+      "key": "ebible:russyn:seed-v1:Ps",
+      "title": "Псалтырь",
+      "language": "ru",
+      "edition": "Синодальный перевод · eBible.org russyn · источник 2025-12-12",
+      "passages": [
+        {
+          "key": "ebible:russyn:seed-v1:Ps.22.1",
+          "ordinal": 22001,
+          "kind": "VERSE",
+          "text": "Господь - Пастырь мой; я ни в чем не буду нуждаться:",
+          "locator": "https://ebible.org/russyn/PSA022.htm#V1",
+          "language": "ru",
+          "verse": {
+            "osis": "Ps.22.1",
+            "book": "Ps",
+            "chapter": 22,
+            "verse": 1
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:Ps.22.2",
+          "ordinal": 22002,
+          "kind": "VERSE",
+          "text": "Он покоит меня на злачных пажитях и водит меня к водам тихим,",
+          "locator": "https://ebible.org/russyn/PSA022.htm#V2",
+          "language": "ru",
+          "verse": {
+            "osis": "Ps.22.2",
+            "book": "Ps",
+            "chapter": 22,
+            "verse": 2
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:Ps.22.3",
+          "ordinal": 22003,
+          "kind": "VERSE",
+          "text": "подкрепляет душу мою, направляет меня на стези правды ради имени Своего.",
+          "locator": "https://ebible.org/russyn/PSA022.htm#V3",
+          "language": "ru",
+          "verse": {
+            "osis": "Ps.22.3",
+            "book": "Ps",
+            "chapter": 22,
+            "verse": 3
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:Ps.22.4",
+          "ordinal": 22004,
+          "kind": "VERSE",
+          "text": "Если я пойду и долиною смертной тени, не убоюсь зла, потому что Ты со мной; Твой жезл и Твой посох - они успокаивают меня.",
+          "locator": "https://ebible.org/russyn/PSA022.htm#V4",
+          "language": "ru",
+          "verse": {
+            "osis": "Ps.22.4",
+            "book": "Ps",
+            "chapter": 22,
+            "verse": 4
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:Ps.22.5",
+          "ordinal": 22005,
+          "kind": "VERSE",
+          "text": "Ты приготовил предо мною трапезу в виду врагов моих; умастил елеем голову мою; чаша моя преисполнена.",
+          "locator": "https://ebible.org/russyn/PSA022.htm#V5",
+          "language": "ru",
+          "verse": {
+            "osis": "Ps.22.5",
+            "book": "Ps",
+            "chapter": 22,
+            "verse": 5
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:Ps.22.6",
+          "ordinal": 22006,
+          "kind": "VERSE",
+          "text": "Так, благость и милость Твоя да сопровождают меня во все дни жизни моей, и я пребуду в доме Господнем многие дни.",
+          "locator": "https://ebible.org/russyn/PSA022.htm#V6",
+          "language": "ru",
+          "verse": {
+            "osis": "Ps.22.6",
+            "book": "Ps",
+            "chapter": 22,
+            "verse": 6
+          }
+        }
+      ]
+    },
+    {
+      "key": "ebible:russyn:seed-v1:John",
+      "title": "Евангелие от Иоанна",
+      "language": "ru",
+      "edition": "Синодальный перевод · eBible.org russyn · источник 2025-12-12",
+      "passages": [
+        {
+          "key": "ebible:russyn:seed-v1:John.1.1",
+          "ordinal": 1001,
+          "kind": "VERSE",
+          "text": "В начале было Слово, и Слово было у Бога, и Слово было Бог.",
+          "locator": "https://ebible.org/russyn/JHN01.htm#V1",
+          "language": "ru",
+          "verse": {
+            "osis": "John.1.1",
+            "book": "John",
+            "chapter": 1,
+            "verse": 1
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:John.1.2",
+          "ordinal": 1002,
+          "kind": "VERSE",
+          "text": "Оно было в начале у Бога.",
+          "locator": "https://ebible.org/russyn/JHN01.htm#V2",
+          "language": "ru",
+          "verse": {
+            "osis": "John.1.2",
+            "book": "John",
+            "chapter": 1,
+            "verse": 2
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:John.1.3",
+          "ordinal": 1003,
+          "kind": "VERSE",
+          "text": "Все чрез Него начало быть, и без Него ничто не начало быть, что начало быть.",
+          "locator": "https://ebible.org/russyn/JHN01.htm#V3",
+          "language": "ru",
+          "verse": {
+            "osis": "John.1.3",
+            "book": "John",
+            "chapter": 1,
+            "verse": 3
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:John.1.4",
+          "ordinal": 1004,
+          "kind": "VERSE",
+          "text": "В Нем была жизнь, и жизнь была свет человеков.",
+          "locator": "https://ebible.org/russyn/JHN01.htm#V4",
+          "language": "ru",
+          "verse": {
+            "osis": "John.1.4",
+            "book": "John",
+            "chapter": 1,
+            "verse": 4
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:John.1.5",
+          "ordinal": 1005,
+          "kind": "VERSE",
+          "text": "И свет во тьме светит, и тьма не объяла его.",
+          "locator": "https://ebible.org/russyn/JHN01.htm#V5",
+          "language": "ru",
+          "verse": {
+            "osis": "John.1.5",
+            "book": "John",
+            "chapter": 1,
+            "verse": 5
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:John.1.14",
+          "ordinal": 1014,
+          "kind": "VERSE",
+          "text": "И Слово стало плотию, и обитало с нами, полное благодати и истины; и мы видели славу Его, славу, как Единородного от Отца.",
+          "locator": "https://ebible.org/russyn/JHN01.htm#V14",
+          "language": "ru",
+          "verse": {
+            "osis": "John.1.14",
+            "book": "John",
+            "chapter": 1,
+            "verse": 14
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:John.3.16",
+          "ordinal": 3016,
+          "kind": "VERSE",
+          "text": "Ибо так возлюбил Бог мир, что отдал Сына Своего Единородного, дабы всякий, верующий в Него, не погиб, но имел жизнь вечную.",
+          "locator": "https://ebible.org/russyn/JHN03.htm#V16",
+          "language": "ru",
+          "verse": {
+            "osis": "John.3.16",
+            "book": "John",
+            "chapter": 3,
+            "verse": 16
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:John.3.17",
+          "ordinal": 3017,
+          "kind": "VERSE",
+          "text": "Ибо не послал Бог Сына Своего в мир, чтобы судить мир, но чтобы мир спасен был чрез Него.",
+          "locator": "https://ebible.org/russyn/JHN03.htm#V17",
+          "language": "ru",
+          "verse": {
+            "osis": "John.3.17",
+            "book": "John",
+            "chapter": 3,
+            "verse": 17
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:John.3.18",
+          "ordinal": 3018,
+          "kind": "VERSE",
+          "text": "Верующий в Него не судится, а неверующий уже осужден, потому что не уверовал во имя Единородного Сына Божия.",
+          "locator": "https://ebible.org/russyn/JHN03.htm#V18",
+          "language": "ru",
+          "verse": {
+            "osis": "John.3.18",
+            "book": "John",
+            "chapter": 3,
+            "verse": 18
+          }
+        }
+      ]
+    },
+    {
+      "key": "ebible:russyn:seed-v1:Eph",
+      "title": "Послание к Ефесянам",
+      "language": "ru",
+      "edition": "Синодальный перевод · eBible.org russyn · источник 2025-12-12",
+      "passages": [
+        {
+          "key": "ebible:russyn:seed-v1:Eph.4.11",
+          "ordinal": 4011,
+          "kind": "VERSE",
+          "text": "И Он поставил одних Апостолми, других пророками, иных Евангелистами, иных пастырями и учителями,",
+          "locator": "https://ebible.org/russyn/EPH04.htm#V11",
+          "language": "ru",
+          "verse": {
+            "osis": "Eph.4.11",
+            "book": "Eph",
+            "chapter": 4,
+            "verse": 11
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:Eph.4.12",
+          "ordinal": 4012,
+          "kind": "VERSE",
+          "text": "к совершению святых, на дело служения, для созидания Тела Христова,",
+          "locator": "https://ebible.org/russyn/EPH04.htm#V12",
+          "language": "ru",
+          "verse": {
+            "osis": "Eph.4.12",
+            "book": "Eph",
+            "chapter": 4,
+            "verse": 12
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:Eph.4.13",
+          "ordinal": 4013,
+          "kind": "VERSE",
+          "text": "доколе все придем в единство веры и познания Сына Божия, в мужа совершенного, в меру полного возраста Христова;",
+          "locator": "https://ebible.org/russyn/EPH04.htm#V13",
+          "language": "ru",
+          "verse": {
+            "osis": "Eph.4.13",
+            "book": "Eph",
+            "chapter": 4,
+            "verse": 13
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:Eph.4.14",
+          "ordinal": 4014,
+          "kind": "VERSE",
+          "text": "дабы мы не были более младенцами, колеблющимися и увлекающимися всяким ветром учения, по лукавству человеков, по хитрому искусству обольщения,",
+          "locator": "https://ebible.org/russyn/EPH04.htm#V14",
+          "language": "ru",
+          "verse": {
+            "osis": "Eph.4.14",
+            "book": "Eph",
+            "chapter": 4,
+            "verse": 14
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:Eph.4.15",
+          "ordinal": 4015,
+          "kind": "VERSE",
+          "text": "но истинною любовью все возращали в Того, Который есть Глава Христос,",
+          "locator": "https://ebible.org/russyn/EPH04.htm#V15",
+          "language": "ru",
+          "verse": {
+            "osis": "Eph.4.15",
+            "book": "Eph",
+            "chapter": 4,
+            "verse": 15
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:Eph.4.16",
+          "ordinal": 4016,
+          "kind": "VERSE",
+          "text": "из Которого все тело, составляемое и совокупляемое посредством всяких взаимно скрепляющих связей, при действии в свою меру каждого члена, получает приращение для созидания самого себя в любви.",
+          "locator": "https://ebible.org/russyn/EPH04.htm#V16",
+          "language": "ru",
+          "verse": {
+            "osis": "Eph.4.16",
+            "book": "Eph",
+            "chapter": 4,
+            "verse": 16
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:Eph.4.26",
+          "ordinal": 4026,
+          "kind": "VERSE",
+          "text": "Гневаясь, не согрешайте: солнце да не зайдет во гневе вашем;",
+          "locator": "https://ebible.org/russyn/EPH04.htm#V26",
+          "language": "ru",
+          "verse": {
+            "osis": "Eph.4.26",
+            "book": "Eph",
+            "chapter": 4,
+            "verse": 26
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:Eph.4.29",
+          "ordinal": 4029,
+          "kind": "VERSE",
+          "text": "Никакое гнилое слово да не исходит из уст ваших, а только доброе для назидания в вере, дабы оно доставляло благодать слушающим.",
+          "locator": "https://ebible.org/russyn/EPH04.htm#V29",
+          "language": "ru",
+          "verse": {
+            "osis": "Eph.4.29",
+            "book": "Eph",
+            "chapter": 4,
+            "verse": 29
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:Eph.4.32",
+          "ordinal": 4032,
+          "kind": "VERSE",
+          "text": "но будьте друг ко другу добры, сострадательны, прощайте друг друга, как и Бог во Христе простил вас.",
+          "locator": "https://ebible.org/russyn/EPH04.htm#V32",
+          "language": "ru",
+          "verse": {
+            "osis": "Eph.4.32",
+            "book": "Eph",
+            "chapter": 4,
+            "verse": 32
+          }
+        }
+      ]
+    },
+    {
+      "key": "ebible:russyn:seed-v1:1Cor",
+      "title": "Первое послание к Коринфянам",
+      "language": "ru",
+      "edition": "Синодальный перевод · eBible.org russyn · источник 2025-12-12",
+      "passages": [
+        {
+          "key": "ebible:russyn:seed-v1:1Cor.13.4",
+          "ordinal": 13004,
+          "kind": "VERSE",
+          "text": "Любовь долготерпит, милосердствует, любовь не завидует, любовь не превозносится, не гордится,",
+          "locator": "https://ebible.org/russyn/1CO13.htm#V4",
+          "language": "ru",
+          "verse": {
+            "osis": "1Cor.13.4",
+            "book": "1Cor",
+            "chapter": 13,
+            "verse": 4
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:1Cor.13.5",
+          "ordinal": 13005,
+          "kind": "VERSE",
+          "text": "не бесчинствует, не ищет своего, не раздражается, не мыслит зла,",
+          "locator": "https://ebible.org/russyn/1CO13.htm#V5",
+          "language": "ru",
+          "verse": {
+            "osis": "1Cor.13.5",
+            "book": "1Cor",
+            "chapter": 13,
+            "verse": 5
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:1Cor.13.6",
+          "ordinal": 13006,
+          "kind": "VERSE",
+          "text": "не радуется неправде, а сорадуется истине;",
+          "locator": "https://ebible.org/russyn/1CO13.htm#V6",
+          "language": "ru",
+          "verse": {
+            "osis": "1Cor.13.6",
+            "book": "1Cor",
+            "chapter": 13,
+            "verse": 6
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:1Cor.13.7",
+          "ordinal": 13007,
+          "kind": "VERSE",
+          "text": "все покрывает, всему верит, всего надеется, все переносит.",
+          "locator": "https://ebible.org/russyn/1CO13.htm#V7",
+          "language": "ru",
+          "verse": {
+            "osis": "1Cor.13.7",
+            "book": "1Cor",
+            "chapter": 13,
+            "verse": 7
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:1Cor.13.8",
+          "ordinal": 13008,
+          "kind": "VERSE",
+          "text": "Любовь никогда не перестает, хотя и пророчества прекратятся, и языки умолкнут, и знание упразднится.",
+          "locator": "https://ebible.org/russyn/1CO13.htm#V8",
+          "language": "ru",
+          "verse": {
+            "osis": "1Cor.13.8",
+            "book": "1Cor",
+            "chapter": 13,
+            "verse": 8
+          }
+        },
+        {
+          "key": "ebible:russyn:seed-v1:1Cor.13.13",
+          "ordinal": 13013,
+          "kind": "VERSE",
+          "text": "А теперь пребывают сии три: вера, надежда, любовь; но любовь из них больше.",
+          "locator": "https://ebible.org/russyn/1CO13.htm#V13",
+          "language": "ru",
+          "verse": {
+            "osis": "1Cor.13.13",
+            "book": "1Cor",
+            "chapter": 13,
+            "verse": 13
+          }
+        }
+      ]
+    }
+  ]
+}

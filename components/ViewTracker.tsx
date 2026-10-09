@@ -9,7 +9,7 @@ export function ViewTracker({ osis }: { osis: string }) {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ osis }),
       keepalive: true,
-    });
+    }).catch(() => { /* Anonymous statistics never block reading. */ });
   }, [osis]);
 
   return null;
