@@ -19,7 +19,7 @@ No database credential is checked into this repository. Source rights and the re
 
 ## Deployment and migration safety
 
-- No migration on push or merge. `.github/workflows/migrate-production.yml` is manual only, main-only, serialized, production-environment-bound, exact-SHA-bound and checks a green CI for the same SHA.
+- No migration on push or merge. `.github/workflows/migrate-production.yml` is manual only, main-only, serialized, production-environment-bound, exact-SHA-bound and checks a green CI for the same SHA. Automatic project CI is now manual-dispatch-only under the 2026-10-09 Work instruction. Neither workflow may be dispatched in this task. Production DDL is blocked until a separately approved migration route resolves this conflict.
 - Operator must provide a dedicated Symphony database name and a restorable backup/preflight evidence receipt. Receipt presence is an attestation, not automated proof of restorability; verify a restore before dispatch.
 - The preflight opens the DIRECT_URL connection and verifies `current_database()` against the exact expected name. It never prints credentials. It refuses shared database names such as `postgres`.
 - Configure environment protection and separate runtime/migration roles outside the app. Runtime role must not be superuser and must not reuse another application's access. If Prisma requires DIRECT_URL at runtime, set it to the runtime connection, not the migration credential.
@@ -28,7 +28,11 @@ No database credential is checked into this repository. Source rights and the re
 
 ## Container
 
-`docker build -t symphony:<sha> .` produces a non-root Next.js standalone container. It does not run migrations or seeds. Supply runtime DATABASE_URL, APP_ORIGIN, RELEASE_SHA and any runtime-only DIRECT_URL required by Prisma. Keep intake off. Proxy HTTPS traffic to its internal port 3000. `/api/health` returns 503 if database/schema access fails and otherwise reports the release revision.
+`docker build --build-arg RELEASE_SHA=<exact-40-character-sha> -t symphony:<sha> .` defines a non-root Next.js standalone container. It does not run migrations or seeds. Supply runtime DATABASE_URL, APP_ORIGIN and any runtime-only DIRECT_URL required by Prisma; these URLs must use the runtime role. Keep intake off. Bind the host proxy port to loopback and recheck its availability immediately before deployment. RELEASE_SHA is embedded during build; an optional runtime RELEASE_SHA must match it. Never tag a locally unbuilt image as verified.
+
+`/api/live` reports process liveness and the embedded revision without querying the database. `/api/ready` and the compatible `/api/health` return 503 unless the exact completed migration ledger/checksums, Prisma model columns/types/nullability and reading credentials agree with this build. Both success and failure responses contain the build revision and forbid caching. The runtime role needs SELECT on the four probe columns of `_prisma_migrations`; it never needs write access to that ledger. These checks do not substitute for role/RLS, data correctness or live-domain E2E tests.
+
+See `docs/WORK_RELEASE_RUNBOOK.md` for the blocked first release and restore/rollback procedure.
 
 ## Release evidence required
 

@@ -1,8 +1,8 @@
 name: CI
 on:
-  pull_request:
-  push:
-    branches: [main]
+  # Work owns validation while automatic Actions execution is prohibited.
+  # Manual dispatch remains available only after separate owner authorization.
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -45,7 +45,7 @@ jobs:
       - name: Build non-root release image and smoke against disposable PostgreSQL
         run: |
           set -euo pipefail
-          docker build --tag symphony-ci:verified .
+          docker build --build-arg RELEASE_SHA="$GITHUB_SHA" --tag symphony-ci:verified .
           test "$(docker inspect --format '{{.Config.User}}' symphony-ci:verified)" = node
           docker run --detach --name symphony-ci --network host \
             -e DATABASE_URL -e DIRECT_URL \
