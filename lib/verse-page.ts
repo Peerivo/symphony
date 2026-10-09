@@ -1,8 +1,9 @@
 import { db } from "./db";
+import { publicPassageWhere, publicQuestionWhere, publicInterpretationWhere, publicClaimWhere, publicArgumentWhere, publicObjectionWhere, publicResponseWhere } from "./publication";
 
 export async function getVersePage(osis: string) {
-  const verse = await db.verse.findUnique({
-    where: { osis },
+  const verse = await db.verse.findFirst({
+    where: { osis, passage: { is: publicPassageWhere } },
     include: {
       passage: {
         include: {
@@ -15,6 +16,7 @@ export async function getVersePage(osis: string) {
           },
           source: true,
           interpretations: {
+            where: publicInterpretationWhere,
             include: {
               tradition: true,
               person: true,
@@ -22,11 +24,13 @@ export async function getVersePage(osis: string) {
             },
           },
           questionLinks: {
+            where: { question: { is: publicQuestionWhere } },
             include: {
               question: { include: { signals: true, topics: { include: { topic: true } } } },
             },
           },
           claimLinks: {
+            where: { claim: { is: publicClaimWhere } },
             include: {
               claim: {
                 include: {
@@ -34,13 +38,16 @@ export async function getVersePage(osis: string) {
                   person: true,
                   sourceFragment: { include: { source: true } },
                   arguments: {
+                    where: publicArgumentWhere,
                     include: { person: true, sourceFragment: { include: { source: true } } },
                   },
                   objections: {
+                    where: publicObjectionWhere,
                     include: {
                       person: true,
                       sourceFragment: { include: { source: true } },
                       responses: {
+                        where: publicResponseWhere,
                         include: { person: true, sourceFragment: { include: { source: true } } },
                       },
                     },

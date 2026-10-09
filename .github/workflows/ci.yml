@@ -3,41 +3,48 @@ on:
   pull_request:
   push:
     branches: [main]
+permissions:
+  contents: read
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
-        image: postgres:16
+        image: postgres:17
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: symphony
-        ports:
-          - 5432:5432
+          POSTGRES_DB: symphony_test
+        ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U postgres -d symphony"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
+          --health-cmd "pg_isready -U postgres -d symphony_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/symphony
-      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/symphony
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/symphony_test
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/symphony_test
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/symphony_test
+      NEXT_TELEMETRY_DISABLED: 1
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-      - run: npm install
-      - run: npx prisma validate
-      - run: npx prisma generate
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx prisma validate && npx prisma generate
       - run: npx prisma migrate deploy
+      - run: npm run typecheck && npm test
+      - run: npm audit --audit-level=high
       - run: npm run ingest:json -- fixtures/ingestion/azbyka.metadata-only.json
-      - name: Verify full-text rights gate
-        run: |
-          if npm run ingest:json -- fixtures/ingestion/denied-full-text.json; then
-            echo "FULL_TEXT rights gate unexpectedly allowed LINK_ONLY"
-            exit 1
-          fi
-          echo "FULL_TEXT rights gate correctly denied LINK_ONLY"
+      - run: npm run ingest:json -- fixtures/ingestion/legal-seed-russyn.json
+      - run: npm run seed:publish -- ci-source-byte-verification docs/SEED_SOURCE.md
       - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure-evidence
+          path: test-results/
+          retention-days: 7

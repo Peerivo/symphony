@@ -1,20 +1,56 @@
 name: Deploy production migrations
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths: ["prisma/migrations/**"]
+    inputs:
+      expected_sha:
+        description: Exact reviewed main commit SHA with successful CI
+        required: true
+      target_database:
+        description: Dedicated Symphony database name (never a shared database)
+        required: true
+      backup_receipt:
+        description: Operator-verified restorable backup/preflight evidence URL or receipt
+        required: true
+      confirm:
+        description: Type MIGRATE_SYMPHONY to apply reviewed migrations
+        required: true
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: symphony-production-migration
+  cancel-in-progress: false
 jobs:
   migrate:
+    if: github.ref == 'refs/heads/main' && inputs.confirm == 'MIGRATE_SYMPHONY'
+    environment: production
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Bind reviewed code and green CI
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(gh api repos/$GITHUB_REPOSITORY/commits/main --jq .sha)" = "$EXPECTED_SHA"
+          gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$EXPECTED_SHA&status=success" --jq '.workflow_runs | any(.head_sha == env.EXPECTED_SHA and .conclusion == "success")' | grep -qx true
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
-      - run: npm install
-      - run: npm run db:deploy:production
+      - run: npm ci --ignore-scripts && npx prisma generate
+      - name: Verify dedicated target and record operator preflight
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          EXPECTED_DATABASE: ${{ inputs.target_database }}
+          BACKUP_RECEIPT: ${{ inputs.backup_receipt }}
+        run: node scripts/migration-preflight.mjs
+      - name: Apply reviewed migrations
+        run: npm run db:deploy:production
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}

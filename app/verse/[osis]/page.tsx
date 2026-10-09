@@ -30,7 +30,7 @@ export default async function VersePage({ params }: { params: Promise<{ osis: st
         {p.locator ? " · " + p.locator : ""}
       </p>
 
-      <QuestionBox osis={verse.osis} />
+      {process.env.QUESTION_INTAKE_ENABLED === "true" ? <QuestionBox osis={verse.osis} /> : <p className="meta">Приём вопросов появится после открытия редакционной очереди.</p>}
 
       <section>
         <h2>Главное по этому месту</h2>

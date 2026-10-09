@@ -6,7 +6,9 @@
     "canonicalUrl": "https://azbyka.ru/",
     "rightsStatus": "LINK_ONLY",
     "rightsEvidence": "Full-text mirroring is disabled until explicit rights/permission evidence is recorded.",
-    "parserVersion": "m1"
+    "parserVersion": "m1",
+    "fetchedAt": "2026-09-18T00:00:00.000Z",
+    "checksum": "sha256:c87bd3513884f792ce84514ef0a270e0ff6410a6dd850907b055da8beabdc18c"
   },
   "corpus": {
     "slug": "azbyka-link-registry",
@@ -18,5 +20,6 @@
       "name": "Православие"
     }
   },
-  "works": []
+  "works": [],
+  "manifestVersion": 1
 }

@@ -213,6 +213,7 @@ model Work {
 }
 
 model Passage {
+  reviewStatus ReviewStatus @default(DRAFT)
   id              String           @id @default(cuid())
   workId          String
   importKey       String?          @unique
@@ -252,6 +253,7 @@ model Verse {
 }
 
 model Interpretation {
+  reviewStatus ReviewStatus @default(DRAFT)
   id               String          @id @default(cuid())
   passageId        String
   traditionId      String?
@@ -277,6 +279,7 @@ model Topic {
 }
 
 model Question {
+  reviewStatus ReviewStatus @default(DRAFT)
   id            String            @id @default(cuid())
   canonicalText String            @db.Text
   normalizedKey String            @unique
@@ -307,6 +310,7 @@ model QuestionTopic {
 }
 
 model Claim {
+  reviewStatus ReviewStatus @default(DRAFT)
   id               String          @id @default(cuid())
   text             String          @db.Text
   status           ClaimStatus     @default(ASSERTED)
@@ -346,6 +350,7 @@ model ClaimTopic {
 }
 
 model Argument {
+  reviewStatus ReviewStatus @default(DRAFT)
   id               String          @id @default(cuid())
   claimId          String
   text             String          @db.Text
@@ -359,6 +364,7 @@ model Argument {
 }
 
 model Objection {
+  reviewStatus ReviewStatus @default(DRAFT)
   id               String          @id @default(cuid())
   claimId          String
   text             String          @db.Text
@@ -374,6 +380,7 @@ model Objection {
 }
 
 model Response {
+  reviewStatus ReviewStatus @default(DRAFT)
   id               String          @id @default(cuid())
   objectionId      String
   text             String          @db.Text
@@ -387,6 +394,7 @@ model Response {
 }
 
 model SourceFragment {
+  reviewStatus ReviewStatus @default(DRAFT)
   id              String           @id @default(cuid())
   passageId       String?
   sourceId        String?
@@ -505,4 +513,11 @@ model PassagePopularitySignal {
 
   @@unique([passageId, bucket])
   @@index([bucket])
+}
+
+// Aggregate abuse budget only: no IP address, cookie or personal query data.
+model IntakeBudget {
+  key String @id
+  bucket DateTime
+  count Int @default(1)
 }

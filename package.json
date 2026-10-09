@@ -4,23 +4,32 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "db:generate": "prisma generate",
     "db:deploy:production": "prisma migrate deploy",
-    "ingest:json": "node scripts/ingest-json.mjs"
+    "ingest:json": "node scripts/ingest-json.mjs",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.mjs tests/*.test.ts",
+    "test:e2e": "playwright test",
+    "seed:publish": "node scripts/publish-seed.mjs"
   },
   "dependencies": {
-    "@prisma/client": "^6.16.2",
-    "next": "^15.5.3",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "@prisma/client": "6.12.0",
+    "next": "16.4.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
-    "prisma": "^6.16.2",
-    "typescript": "^5.9.2",
-    "@types/node": "^24.3.1",
-    "@types/react": "^19.1.12",
-    "@types/react-dom": "^19.1.9"
+    "@playwright/test": "1.64.0",
+    "@types/node": "24.19.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "prisma": "6.12.0",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=24 <25"
   }
 }
