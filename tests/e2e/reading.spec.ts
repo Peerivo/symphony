@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test';
 
-test('read-only scripture journey, sources and interrupted navigation', async({page,request})=>{
+test('read-only scripture journey, sources and interrupted navigation', async({page,request}, testInfo)=>{
   await page.goto('/');
   await expect(page.getByRole('heading',{name:'Спросите так, как думаете.'})).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('home.png'), fullPage: true });
   await page.getByRole('textbox',{name:'Стих, цитата или вопрос'}).fill('Ин 3:16');
   await page.getByRole('button',{name:'Найти',exact:true}).click();
   await expect(page.getByRole('link',{name:'John 3:16',exact:true})).toBeVisible();
@@ -12,6 +13,7 @@ test('read-only scripture journey, sources and interrupted navigation', async({p
   await expect(page.getByText('Приём вопросов появится после открытия редакционной очереди.')).toBeVisible();
   await expect(page.getByRole('button',{name:'Передать редакции'})).toHaveCount(0);
   await expect(page.getByRole('link',{name:'Открыть источник ↗'})).toHaveAttribute('href','https://ebible.org/russyn/');
+  await page.screenshot({ path: testInfo.outputPath('verse.png'), fullPage: true });
   await page.goBack(); await expect(page.getByRole('heading',{name:'«Ин 3:16»'})).toBeVisible();
   await page.goForward(); await expect(page.getByRole('heading',{name:'John 3:16',exact:true})).toBeVisible();
   await page.reload(); await expect(page.locator('blockquote').first()).toContainText('Ибо так возлюбил Бог мир');

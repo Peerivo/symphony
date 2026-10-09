@@ -317,3 +317,30 @@ test("validation-only CLI does not instantiate Prisma, and normal CLI disconnect
 test("CLI rejects absent, ambiguous, or unsupported arguments", async () => {
   for (const args of [[], ["one", "two"], ["--help"], ["--validate-only"], ["--validate-only", "--validate-only", "file"]]) await assert.rejects(runCli(args), /Usage:/);
 });
+
+for (const value of [null, [], [manifest()], "manifest", true, 1]) {
+  test(`rejects a non-object manifest (${JSON.stringify(value)?.slice(0, 30)}) before database access`, async () => {
+    const db = database();
+    await assert.rejects(importManifest(db, value), /manifest must be an object/);
+    assert.equal(db.calls.length, 0);
+  });
+}
+
+for (const field of ["source", "corpus"]) {
+  test(`rejects array-valued ${field} before database access`, async () => {
+    const input = manifest();
+    input[field] = [input[field]];
+    const db = database();
+    await assert.rejects(importManifest(db, input), new RegExp(`${field} must be an object`));
+    assert.equal(db.calls.length, 0);
+  });
+}
+
+test("orders a wide hierarchy without spreading all children onto the call stack", () => {
+  const passages = [{ key: "root", parentKey: null }];
+  for (let index = 0; index < 150000; index++) passages.push({ key: `child-${index}`, parentKey: "root" });
+  const ordered = orderPassages(passages);
+  assert.equal(ordered.length, passages.length);
+  assert.equal(ordered[0].key, "root");
+  assert.equal(ordered.at(-1).key, "child-149999");
+});
