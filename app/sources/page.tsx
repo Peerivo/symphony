@@ -1,3 +1,4 @@
+import { rightsLabel } from "../../lib/source-labels";
 import { db } from "../../lib/db";
 import { publicSourceWhere, publicPassageWhere } from "../../lib/publication";
 export const dynamic = "force-dynamic";
@@ -8,7 +9,7 @@ export default async function Sources() {
     {!sources.length && <p>Опубликованных источников пока нет.</p>}
     {sources.map(source => <article className="evidence" key={source.id}><h2>{source.name}</h2>
       <p><a href={source.canonicalUrl!} rel="noreferrer">К первоисточнику ↗</a></p>
-      <p>Статус прав: {source.rightsStatus}. {source.license}</p><p>{source.rightsEvidence}</p>
+      <p>Статус прав: {rightsLabel(source.rightsStatus)}. {source.license}</p><p>{source.rightsEvidence}</p>
       <small>Получено: {source.fetchedAt?.toISOString().slice(0, 10)} · Обработчик: {source.parserVersion}</small>
       <p className="checksum">Контрольная сумма: {source.checksum}</p>
     </article>)}

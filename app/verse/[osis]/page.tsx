@@ -1,3 +1,4 @@
+import { rightsLabel, sourceHref } from "../../../lib/source-labels";
 import { notFound } from "next/navigation";
 import { QuestionBox } from "../../../components/QuestionBox";
 import { ViewTracker } from "../../../components/ViewTracker";
@@ -11,7 +12,8 @@ function attribution(person?: { name: string } | null, tradition?: { name: strin
 
 export default async function VersePage({ params }: { params: Promise<{ osis: string }> }) {
   const { osis } = await params;
-  const verse = await getVersePage(decodeURIComponent(osis));
+  if (osis.length > 80 || !/^[1-3]?[A-Za-z]+\.[1-9]\d*\.[1-9]\d*$/.test(osis)) notFound();
+  const verse = await getVersePage(osis);
   if (!verse) notFound();
 
   const p = verse.passage;
@@ -22,12 +24,12 @@ export default async function VersePage({ params }: { params: Promise<{ osis: st
       <ViewTracker osis={verse.osis} />
       <a href="/">← Симфония</a>
       <p className="eyebrow">{p.work.corpus.name}</p>
-      <h1>{verse.book} {verse.chapter}:{verse.verse}</h1>
+      <h1>{p.work.title} {verse.chapter}:{verse.verse}</h1>
       <blockquote>{p.text}</blockquote>
       <p className="meta">
         {p.work.edition || p.work.title}
         {p.work.author ? " · " + p.work.author.name : ""}
-        {p.locator ? " · " + p.locator : ""}
+        {p.locator && !p.locator.startsWith("https://") ? " · " + p.locator : ""}
       </p>
 
       {process.env.QUESTION_INTAKE_ENABLED === "true" ? <QuestionBox osis={verse.osis} /> : <p className="meta">Приём вопросов появится после открытия редакционной очереди.</p>}
@@ -91,11 +93,11 @@ export default async function VersePage({ params }: { params: Promise<{ osis: st
       </section>
 
       <section className="result">
-        <p className="eyebrow">PROVENANCE</p>
+        <p className="eyebrow">ИСТОЧНИК И ПРАВА</p>
         <p>
-          {source ? <>Источник: <b>{source.name}</b>. Права: <b>{source.rightsStatus}</b>.</> : "Источник не указан."}
+          {source ? <>Источник: <b>{source.name}</b>. Права: <b>{rightsLabel(source.rightsStatus)}</b>.</> : "Источник не указан."}
         </p>
-        {source?.canonicalUrl && <a href={source.canonicalUrl}>Открыть источник ↗</a>}
+        {source?.canonicalUrl && <a href={sourceHref(p.locator, source.canonicalUrl)}>Открыть источник ↗</a>}
       </section>
     </main>
   );

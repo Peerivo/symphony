@@ -18,7 +18,7 @@ export default async function Home() {
           <input name="q" aria-label="Стих, цитата или вопрос" maxLength={500} placeholder="Например: где сказано про ветры учения?" />
           <button>Найти</button>
         </form>
-        <small>Пилотный корпус: Синодальный перевод. Вопросы проходят редакционную проверку до публикации.</small>
+        <small>Пилотный корпус: 35 стихов Синодального перевода. Поиск по тексту и ссылкам; приём вопросов пока закрыт.</small>
       </section>
 
       <section>
@@ -40,7 +40,7 @@ export default async function Home() {
         {highlights.passages.length === 0 && <p>Статистика чтения начнёт собираться после публикации корпуса.</p>}
         {highlights.passages.map((p) => (
           <article className="evidence" key={p.id}>
-            <h3>{p.verse ? <a href={"/verse/" + p.verse.osis}>{p.verse.book} {p.verse.chapter}:{p.verse.verse}</a> : p.heading || p.work.title}</h3>
+            <h3>{p.verse ? <a href={"/verse/" + p.verse.osis}>{p.work.title} {p.verse.chapter}:{p.verse.verse}</a> : p.heading || p.work.title}</h3>
             <p>{p.text.length > 260 ? p.text.slice(0, 260) + "…" : p.text}</p>
             <small>{p.work.corpus.name} {p.popularity > 0 ? ` · ${p.popularity} просмотров` : ""}</small>
           </article>
@@ -50,7 +50,7 @@ export default async function Home() {
       <section className="path">
         <p className="eyebrow">ПУТЬ ИСТИНЫ</p>
         <h2>Проверяйте утверждение по источникам</h2>
-        <p>Вопрос связывается с местами Писания, толкованиями, позициями конкретных традиций и авторов, аргументами, возражениями, ответами и точными первоисточниками.</p>
+        <p>Карты толкований и разногласий появятся после проверки редакцией. Для каждого утверждения будут указаны конкретный автор и точный первоисточник.</p>
       </section>
     </main>
   );

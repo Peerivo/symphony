@@ -26,3 +26,11 @@ test('every public query requires reviewed publication and rights',()=>{
   assert.equal(publicClaimWhere.sourceFragment.is.reviewStatus,'PUBLISHED');
   assert.deepEqual(publicPassageWhere.source.is.rightsStatus.in,['PUBLIC_DOMAIN','LICENSED','PERMISSION_GRANTED']);
 });
+
+test('source links reject executable or credential-bearing locators', async()=>{
+  const { sourceHref, rightsLabel } = await import('../lib/source-labels');
+  assert.equal(sourceHref('https://ebible.org/russyn/JHN03.htm#V16','https://ebible.org/russyn/'),'https://ebible.org/russyn/JHN03.htm#V16');
+  assert.equal(sourceHref('javascript:alert(1)','https://ebible.org/russyn/'),'https://ebible.org/russyn/');
+  assert.equal(sourceHref('https://user:secret@example.invalid',null),undefined);
+  assert.equal(rightsLabel('PUBLIC_DOMAIN'),'общественное достояние');
+});
