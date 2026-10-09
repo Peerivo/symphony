@@ -42,6 +42,28 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - name: Build non-root release image and smoke against disposable PostgreSQL
+        run: |
+          set -euo pipefail
+          docker build --tag symphony-ci:verified .
+          test "$(docker inspect --format '{{.Config.User}}' symphony-ci:verified)" = node
+          docker run --detach --name symphony-ci --network host \
+            -e DATABASE_URL -e DIRECT_URL \
+            -e APP_ORIGIN=http://127.0.0.1:34392 -e PORT=34392 \
+            -e RELEASE_SHA="$GITHUB_SHA" symphony-ci:verified
+          trap 'docker logs symphony-ci; docker rm -f symphony-ci' EXIT
+          ready=false
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:34392/api/health > /tmp/symphony-health.json; then ready=true; break; fi
+            sleep 1
+          done
+          test "$ready" = true
+          docker exec symphony-ci node -e "fetch('http://127.0.0.1:'+process.env.PORT+'/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+          jq -e --arg sha "$GITHUB_SHA" '.status == "ok" and .revision == $sha' /tmp/symphony-health.json
+          curl --fail --silent http://127.0.0.1:34392/corpus > /tmp/symphony-corpus.html
+          grep -q 'Синодальный' /tmp/symphony-corpus.html
+          test "$(curl --silent --output /tmp/symphony-intake.json --write-out '%{http_code}' -X POST http://127.0.0.1:34392/api/questions)" = 503
+          jq -e '.error == "intake_disabled"' /tmp/symphony-intake.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
