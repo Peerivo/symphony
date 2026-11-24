@@ -2,7 +2,7 @@
 
 ## First release
 
-Read-only, provenance-first scripture pilot: a source-verified selection of 35 Russian Synodal verses, exact and approximate lexical search, verse pages, corpus navigation and source/rights evidence. This is not a full Bible, an AI answer service or a verified theological interpretation corpus. Empty interpretation and debate sections say so.
+Read-only, provenance-first scripture pilot: a source-verified selection of 35 Russian Synodal verses, exact and approximate lexical search, verse pages, corpus navigation and source/rights evidence. This is not a full Bible, an AI answer service or a verified theological interpretation corpus. Empty interpretation and debate sections say so. The reader also shows a bounded two-verse context in the same work and chapter, never filling missing verses or crossing publication/rights gates.
 
 Question intake defaults OFF (`QUESTION_INTAKE_ENABLED=false`). Enabling it requires an approved operator/contact, retention/deletion process and actual moderation ownership. The optional intake requires explicit consent, stores drafts privately, never publishes raw questions automatically, rejects cross-origin/oversized requests and uses a database-wide anonymous aggregate request budget. It creates no user tracking identifier. A canonical question must be anonymized and reviewed before publication. There is no public moderation endpoint.
 

@@ -32,6 +32,10 @@ Claim status records agreement/disagreement without flattening it into a binary 
 6. disagreement/debate map;
 7. exact primary-source fragments and provenance.
 
+## Readable verse context
+
+The reader retrieves up to two verse numbers on either side, within the exact same work and chapter. Each retrieved passage independently passes the public editorial and legal provenance gate. Gaps are not filled or interpreted as absent from Scripture; previous/next navigation only appears for directly adjacent published verses.
+
 ## Questions are knowledge
 
 A user query is not only a transient search log. After normalization/deduplication it can become a canonical Question node and link to multiple passages/topics. PopularitySignal is aggregated separately so frequently asked questions can surface on verse/topic pages without publishing personal raw query data.

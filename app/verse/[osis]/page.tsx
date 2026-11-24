@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { QuestionBox } from "../../../components/QuestionBox";
 import { ViewTracker } from "../../../components/ViewTracker";
 import { getVersePage } from "../../../lib/verse-page";
+import { adjacentPublishedVerses } from "../../../lib/reading-context";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,7 @@ export default async function VersePage({ params }: { params: Promise<{ osis: st
 
   const p = verse.passage;
   const source = p.source ?? p.work.source;
+  const { previous, next } = adjacentPublishedVerses(verse.context, verse.verse);
 
   return (
     <main>
@@ -31,6 +33,28 @@ export default async function VersePage({ params }: { params: Promise<{ osis: st
         {p.work.author ? " · " + p.work.author.name : ""}
         {p.locator && !p.locator.startsWith("https://") ? " · " + p.locator : ""}
       </p>
+
+      <section className="reading-context" aria-labelledby="reading-context-heading">
+        <p className="eyebrow">ЧТЕНИЕ ПИСАНИЯ</p>
+        <h2 id="reading-context-heading">В контексте главы</h2>
+        <p className="meta">Показаны только доступные опубликованные стихи в пределах двух номеров от выбранного. Это не полный текст главы.</p>
+        <ol className="verse-context">
+          {verse.context.map((item) => (
+            <li key={item.osis} className={item.osis === verse.osis ? "selected" : undefined}>
+              <a href={"/verse/" + item.osis} aria-current={item.osis === verse.osis ? "page" : undefined}>
+                {verse.chapter}:{item.verse}
+              </a>
+              <span>{item.passage.text}</span>
+            </li>
+          ))}
+        </ol>
+        {(previous || next) && <nav className="verse-navigation" aria-label="Переход между соседними стихами">
+          {previous
+            ? <a href={"/verse/" + previous.osis}>← Предыдущий стих ({verse.chapter}:{previous.verse})</a>
+            : <span />}
+          {next && <a href={"/verse/" + next.osis}>Следующий стих ({verse.chapter}:{next.verse}) →</a>}
+        </nav>}
+      </section>
 
       {process.env.QUESTION_INTAKE_ENABLED === "true" ? <QuestionBox osis={verse.osis} /> : <p className="meta">Приём вопросов появится после открытия редакционной очереди.</p>}
 
