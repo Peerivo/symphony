@@ -30,6 +30,10 @@ No database credential is checked into this repository. Source rights and the re
 
 `docker build -t symphony:<sha> .` produces a non-root Next.js standalone container. It does not run migrations or seeds. Supply runtime DATABASE_URL, APP_ORIGIN, RELEASE_SHA and any runtime-only DIRECT_URL required by Prisma. Keep intake off. Proxy HTTPS traffic to its internal port 3000. `/api/health` returns 503 if database/schema access fails and otherwise reports the release revision.
 
+## Dependency security
+
+The reader increment pins Next.js 16.4.6 instead of the vulnerable 16.4.0 release. On 2026-11-24, the pinned lockfile returned zero npm audit findings. Re-run the audit before a real deployment; package audit is not a production security guarantee.
+
 ## Release evidence required
 
 - exact commit and successful unit, PostgreSQL integration, typecheck, build and mobile/desktop browser tests;
