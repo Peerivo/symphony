@@ -2,7 +2,7 @@
 
 ## First release
 
-Read-only, provenance-first scripture pilot: a source-verified selection of 35 Russian Synodal verses, exact and approximate lexical search, verse pages, corpus navigation and source/rights evidence. This is not a full Bible, an AI answer service or a verified theological interpretation corpus. Empty interpretation and debate sections say so.
+Read-only, provenance-first scripture pilot: a source-verified selection of 35 Russian Synodal verses, exact and approximate lexical search, verse pages, corpus navigation and source/rights evidence. This is not a full Bible, an AI answer service or a verified theological interpretation corpus. Empty interpretation and debate sections say so. The reader also shows a bounded two-verse context in the same work and chapter, never filling missing verses or crossing publication/rights gates.
 
 Question intake defaults OFF (`QUESTION_INTAKE_ENABLED=false`). Enabling it requires an approved operator/contact, retention/deletion process and actual moderation ownership. The optional intake requires explicit consent, stores drafts privately, never publishes raw questions automatically, rejects cross-origin/oversized requests and uses a database-wide anonymous aggregate request budget. It creates no user tracking identifier. A canonical question must be anonymized and reviewed before publication. There is no public moderation endpoint.
 
@@ -29,6 +29,10 @@ No database credential is checked into this repository. Source rights and the re
 ## Container
 
 `docker build -t symphony:<sha> .` produces a non-root Next.js standalone container. It does not run migrations or seeds. Supply runtime DATABASE_URL, APP_ORIGIN, RELEASE_SHA and any runtime-only DIRECT_URL required by Prisma. Keep intake off. Proxy HTTPS traffic to its internal port 3000. `/api/health` returns 503 if database/schema access fails and otherwise reports the release revision.
+
+## Dependency security
+
+The reader increment pins Next.js 16.4.6 instead of the vulnerable 16.4.0 release. On 2026-11-24, the pinned lockfile returned zero npm audit findings. Re-run the audit before a real deployment; package audit is not a production security guarantee.
 
 ## Release evidence required
 

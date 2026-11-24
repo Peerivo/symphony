@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { getPublishedVerseContext } from "./reading-context";
 import { publicPassageWhere, publicQuestionWhere, publicInterpretationWhere, publicClaimWhere, publicArgumentWhere, publicObjectionWhere, publicResponseWhere } from "./publication";
 
 export async function getVersePage(osis: string) {
@@ -71,5 +72,6 @@ export async function getVersePage(osis: string) {
     }))
     .sort((a, b) => b.popularity - a.popularity || b.relevance - a.relevance);
 
-  return { ...verse, questions };
+  const context = await getPublishedVerseContext(verse);
+  return { ...verse, questions, context };
 }

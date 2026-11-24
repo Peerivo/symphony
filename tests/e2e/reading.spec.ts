@@ -10,10 +10,21 @@ test('read-only scripture journey, sources and interrupted navigation', async({p
   await page.getByRole('link',{name:'Евангелие от Иоанна 3:16',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Евангелие от Иоанна 3:16',exact:true})).toBeVisible();
   await expect(page.locator('blockquote').first()).toContainText('Ибо так возлюбил Бог мир');
+  await expect(page.getByRole('heading',{name:'В контексте главы'})).toBeVisible();
+  await expect(page.getByRole('list').getByRole('link',{name:'3:16'})).toHaveAttribute('aria-current','page');
+  await expect(page.getByRole('link',{name:'Следующий стих (3:17) →'})).toBeVisible();
+  await expect(page.getByRole('link',{name:'← Предыдущий стих (3:15)'})).toHaveCount(0);
+  await page.getByRole('link',{name:'Следующий стих (3:17) →'}).click();
+  await expect(page.getByRole('heading',{name:'Евангелие от Иоанна 3:17',exact:true})).toBeVisible();
+  await expect(page.getByRole('link',{name:'← Предыдущий стих (3:16)'})).toBeVisible();
+  await page.getByRole('link',{name:'← Предыдущий стих (3:16)'}).click();
+
   await expect(page.getByText('Приём вопросов появится после открытия редакционной очереди.')).toBeVisible();
   await expect(page.getByRole('button',{name:'Передать редакции'})).toHaveCount(0);
   await expect(page.getByRole('link',{name:'Открыть источник ↗'})).toHaveAttribute('href','https://ebible.org/russyn/JHN03.htm#V16');
   await page.screenshot({ path: testInfo.outputPath('verse.png'), fullPage: true });
+  await page.goBack(); await expect(page.getByRole('heading',{name:'Евангелие от Иоанна 3:17',exact:true})).toBeVisible();
+  await page.goBack(); await expect(page.getByRole('heading',{name:'Евангелие от Иоанна 3:16',exact:true})).toBeVisible();
   await page.goBack(); await expect(page.getByRole('heading',{name:'«Ин 3:16»'})).toBeVisible();
   await page.goForward(); await expect(page.getByRole('heading',{name:'Евангелие от Иоанна 3:16',exact:true})).toBeVisible();
   await page.reload(); await expect(page.locator('blockquote').first()).toContainText('Ибо так возлюбил Бог мир');
