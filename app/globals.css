@@ -4,6 +4,10 @@ blockquote{font-size:24px;line-height:1.6;margin:28px 0;padding-left:24px;border
 nav{margin-top:18px;font:15px system-ui}.checksum{font:12px/1.6 monospace;overflow-wrap:anywhere}button{min-height:44px}input{box-sizing:border-box;min-width:0}article{overflow-wrap:anywhere}
 
 
+.external-commentary{border-left:3px solid #b9ad9b;padding:4px 0 4px 20px;margin:20px 0}
+.external-commentary p{font-size:16px;line-height:1.55}
+.external-commentary .meta{font-size:13px}
+
 .reading-context{margin-top:32px}
 .verse-context{list-style:none;margin:20px 0;padding:0;border-block:1px solid #d7cebf}
 .verse-context li{display:grid;grid-template-columns:70px minmax(0,1fr);gap:16px;padding:14px 12px;border-top:1px solid #e1d9cc;line-height:1.55}
