@@ -7,3 +7,14 @@ nav{margin-top:18px;font:15px system-ui}.checksum{font:12px/1.6 monospace;overfl
 .external-commentary{border-left:3px solid #b9ad9b;padding:4px 0 4px 20px;margin:20px 0}
 .external-commentary p{font-size:16px;line-height:1.55}
 .external-commentary .meta{font-size:13px}
+
+.reading-context{margin-top:32px}
+.verse-context{list-style:none;margin:20px 0;padding:0;border-block:1px solid #d7cebf}
+.verse-context li{display:grid;grid-template-columns:70px minmax(0,1fr);gap:16px;padding:14px 12px;border-top:1px solid #e1d9cc;line-height:1.55}
+.verse-context li:first-child{border-top:0}
+.verse-context li.selected{background:#ece5d6;border-radius:4px}
+.verse-context a{font:700 15px/1.6 system-ui;align-self:start}
+.verse-context span{font-size:18px;overflow-wrap:anywhere}
+.verse-navigation{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.verse-navigation a{display:inline-block;min-height:44px;padding:10px 0}
+@media(max-width:650px){.verse-context li{grid-template-columns:54px minmax(0,1fr);gap:8px}.verse-context span{font-size:16px}}
