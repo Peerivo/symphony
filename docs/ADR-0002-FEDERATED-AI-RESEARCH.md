@@ -87,6 +87,8 @@ For each answer provide a concise answer, `why these passages`, `what named inte
 | D | Permissioned metadata/bulk feed or negotiated API from Azbyka and other publishers | Rights and volume approved, import idempotent and measurable, no destructive reimport |
 | E | Parallel passages + claim/debate map, evaluation sets and editorial curation | Precision/relevance/factuality testing, source coverage and operator controls; production release separately approved |
 
+Stage A implementation: `lib/external-commentary.ts`, verse-page external link, unit tests and desktop/mobile E2E; limited to the five distinct Bible books in the current M1 pilot. On-demand external scraping, AI answering and batch index import are **not implemented** by this change.
+
 Milestone A does not require scraping or storing full text. Stages B/C can proceed with public-domain data and link-only external metadata while permissioned imports are negotiated. Production rollout remains gated by real-domain tests and separately approved infrastructure.
 
 ## Evaluation / abuse constraints
