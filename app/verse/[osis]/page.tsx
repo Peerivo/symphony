@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { QuestionBox } from "../../../components/QuestionBox";
 import { ViewTracker } from "../../../components/ViewTracker";
 import { getVersePage } from "../../../lib/verse-page";
+import { externalCommentaryForVerse } from "../../../lib/external-commentary";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,7 @@ export default async function VersePage({ params }: { params: Promise<{ osis: st
 
   const p = verse.passage;
   const source = p.source ?? p.work.source;
+  const externalCommentary = externalCommentaryForVerse(verse.osis);
 
   return (
     <main>
@@ -50,6 +52,13 @@ export default async function VersePage({ params }: { params: Promise<{ osis: st
         <p className="eyebrow">ТОЛКОВАНИЯ</p>
         <h2>Как это место объясняют источники</h2>
         {p.interpretations.length === 0 && <p>Проверенные толкования ещё не связаны с этим местом.</p>}
+        {externalCommentary && <div className="external-commentary">
+          <p>Внешний каталог: <b>{externalCommentary.sourceLabel}</b> (только ссылка, без копирования текста).</p>
+          <a href={externalCommentary.url} target="_blank" rel="noopener noreferrer">
+            Найти толкования этого стиха на «Азбуке веры» ↗
+          </a>
+          <p className="meta">Материалы принадлежат внешнему ресурсу и не прошли редакционную проверку «Симфонии».</p>
+        </div>}
         {p.interpretations.map((item) => (
           <article className="evidence" key={item.id}>
             <b>{attribution(item.person, item.tradition)}</b>
